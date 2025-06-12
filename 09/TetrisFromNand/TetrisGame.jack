@@ -1,0 +1,177 @@
+class TetrisGame {
+    field GameLogic gameLogic;
+    field GameRenderer renderer;
+    field InputHandler inputHandler;
+    
+    constructor TetrisGame new() {
+        let gameLogic = GameLogic.new();
+        let renderer = GameRenderer.new();
+        let inputHandler = InputHandler.new();
+        return this;
+    }
+    
+    method void run() {
+        var int counter, dropSpeed;
+        var boolean moved, needsRedraw, gameStarted;
+        var boolean wasGameOver, gameOverScreenShown;
+        var int cleanupCounter, memoryCleanupInterval;
+        var PieceGenerator pieceGen;
+        var int nextPieceType;
+        
+        let counter = 0;
+        let moved = false;
+        let needsRedraw = true;
+        let gameStarted = false;
+        let wasGameOver = false;
+        let gameOverScreenShown = false;
+        let cleanupCounter = 0;
+        let memoryCleanupInterval = 150; // 더 자주 메모리 정리 (200 -> 150)
+        
+        // Set faster input repeat speed (delay: 4 frames, interval: 1 frame)
+        do inputHandler.setRepeatRate(4, 1);
+        
+        while (true) {
+            // Update input state
+            do inputHandler.update();
+            
+            let moved = false;
+            let dropSpeed = gameLogic.getDropSpeed();
+            
+            // Get next piece type in advance
+            let pieceGen = gameLogic.getPieceGenerator();
+            let nextPieceType = pieceGen.getNextPieceType();
+            
+            // 더 적극적인 메모리 정리
+            let cleanupCounter = cleanupCounter + 1;
+            if (cleanupCounter > memoryCleanupInterval) {
+                // 게임 진행 중에만 메모리 정리 수행
+                if (~gameLogic.isGameOver()) {
+                    do gameLogic.forceMemoryCleanup();
+                }
+                let cleanupCounter = 0;
+                
+                // 정리 간격을 동적으로 조정 (레벨이 높을수록 더 자주)
+                let memoryCleanupInterval = 200 - (gameLogic.getLevel() * 5);
+                if (memoryCleanupInterval < 100) {
+                    let memoryCleanupInterval = 100; // 최소 100프레임 간격 유지
+                }
+            }
+            
+            // Detect game over state change
+            if ((~wasGameOver) & gameLogic.isGameOver()) {
+                let gameOverScreenShown = false;
+                let needsRedraw = true;
+            }
+            let wasGameOver = gameLogic.isGameOver();
+            
+            // Handle only when game is in progress
+            if (~gameLogic.isGameOver()) {
+                let gameOverScreenShown = false;
+                
+                // Faster input processing (immediate response)
+                if (inputHandler.isLeftPressed()) {
+                    if (gameLogic.moveLeft()) {
+                        let moved = true;
+                    }
+                }
+                
+                if (inputHandler.isRightPressed()) {
+                    if (gameLogic.moveRight()) {
+                        let moved = true;
+                    }
+                }
+                
+                if (inputHandler.isUpPressed()) {
+                    if (gameLogic.rotate(true)) {
+                        let moved = true;
+                    }
+                }
+                
+                if (inputHandler.isDownPressed()) {
+                    if (gameLogic.moveDown()) {
+                        let moved = true;
+                    }
+                }
+                
+                if (inputHandler.isSpacePressed()) {
+                    if (gameLogic.hardDrop() > 0) {
+                        let moved = true;
+                    }
+                }
+                
+                // Faster automatic falling
+                let counter = counter + 1;
+                if (counter > dropSpeed) {
+                    if (gameLogic.tick()) {
+                        let moved = true;
+                    }
+                    let counter = 0;
+                }
+                
+                // Rendering optimization
+                if (needsRedraw & (~gameStarted)) {
+                    do renderer.renderInitialWithNext(gameLogic.getBoard(), gameLogic.getCurrentPiece(), gameLogic.getGhostPiece(), gameLogic.getScore(), gameLogic.getLevel(), gameLogic.getLinesCleared(), nextPieceType);
+                    let gameStarted = true;
+                    let needsRedraw = false;
+                } else {
+                    if (moved) {
+                        do renderer.renderWithNext(gameLogic.getBoard(), gameLogic.getCurrentPiece(), gameLogic.getGhostPiece(), gameLogic.getScore(), gameLogic.getLevel(), gameLogic.getLinesCleared(), nextPieceType);
+                    }
+                }
+                
+            } else {
+                // Game over state
+                if ((needsRedraw) | (~gameOverScreenShown)) {
+                    do renderer.renderWithNext(gameLogic.getBoard(), gameLogic.getCurrentPiece(), gameLogic.getGhostPiece(), gameLogic.getScore(), gameLogic.getLevel(), gameLogic.getLinesCleared(), nextPieceType);
+                    do renderer.drawGameOver();
+                    let needsRedraw = false;
+                    let gameOverScreenShown = true;
+                }
+            }
+            
+            // Handle restart
+            if (inputHandler.isRestartPressed()) {
+                do gameLogic.restart();
+                do renderer.reset();
+                do inputHandler.reset();
+                let moved = true;
+                let needsRedraw = true;
+                let gameStarted = false;
+                let gameOverScreenShown = false;
+                let wasGameOver = false;
+                let cleanupCounter = 0;
+                let memoryCleanupInterval = 150; // 리셋시 기본값으로 복원
+            }
+            
+            // Handle quit
+            if (inputHandler.isQuitPressed()) {
+                return;
+            }
+            
+            do Sys.wait(25); // Halved for faster responsiveness (50ms -> 25ms)
+        }
+        
+        return;
+    }
+    
+    method void dispose() {
+        // Safe memory deallocation order
+        if (~(inputHandler = 0)) {
+            do inputHandler.dispose();
+            let inputHandler = 0;
+        }
+        
+        if (~(gameLogic = 0)) {
+            do gameLogic.dispose();
+            let gameLogic = 0;
+        }
+        
+        if (~(renderer = 0)) {
+            do renderer.dispose();
+            let renderer = 0;
+        }
+        
+        do Memory.deAlloc(this);
+        return;
+    }
+}

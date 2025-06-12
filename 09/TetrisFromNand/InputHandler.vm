@@ -1,0 +1,423 @@
+function InputHandler.new 0
+    push constant 13
+    call Memory.alloc 1
+    pop pointer 0
+    push constant 0
+    pop this 0
+    push constant 0
+    pop this 1
+    push constant 4
+    pop this 2
+    push constant 1
+    pop this 3
+    push constant 0
+    pop this 4
+    push constant 0
+    pop this 5
+    push constant 0
+    pop this 6
+    push constant 0
+    pop this 7
+    push constant 0
+    pop this 8
+    push constant 0
+    pop this 9
+    push constant 0
+    pop this 10
+    push constant 0
+    pop this 11
+    push constant 0
+    pop this 12
+    push pointer 0
+    return
+function InputHandler.update 1
+    push argument 0
+    pop pointer 0
+    call Keyboard.keyPressed 0
+    pop local 0
+    push pointer 0
+    push constant 130
+    push local 0
+    call InputHandler.updateKeyState 3
+    pop temp 0
+    push pointer 0
+    push constant 132
+    push local 0
+    call InputHandler.updateKeyState 3
+    pop temp 0
+    push pointer 0
+    push constant 131
+    push local 0
+    call InputHandler.updateKeyState 3
+    pop temp 0
+    push pointer 0
+    push constant 133
+    push local 0
+    call InputHandler.updateKeyState 3
+    pop temp 0
+    push pointer 0
+    push constant 32
+    push local 0
+    call InputHandler.updateKeyState 3
+    pop temp 0
+    push pointer 0
+    push constant 82
+    push local 0
+    call InputHandler.updateKeyState 3
+    pop temp 0
+    push pointer 0
+    push constant 114
+    push local 0
+    call InputHandler.updateKeyState 3
+    pop temp 0
+    push pointer 0
+    push constant 81
+    push local 0
+    call InputHandler.updateKeyState 3
+    pop temp 0
+    push pointer 0
+    push constant 113
+    push local 0
+    call InputHandler.updateKeyState 3
+    pop temp 0
+    push constant 0
+    return
+function InputHandler.updateKeyState 0
+    push argument 0
+    pop pointer 0
+    push argument 2
+    push argument 1
+    eq
+    not
+    if-goto InputHandler_1
+    push this 0
+    push argument 1
+    eq
+    not
+    if-goto InputHandler_3
+    push this 1
+    push constant 1
+    add
+    pop this 1
+    goto InputHandler_2
+label InputHandler_3
+    push constant 0
+    pop this 1
+    push argument 1
+    pop this 0
+label InputHandler_2
+    goto InputHandler_0
+label InputHandler_1
+    push this 0
+    push argument 1
+    eq
+    not
+    if-goto InputHandler_5
+    push constant 0
+    pop this 0
+    push constant 0
+    pop this 1
+    goto InputHandler_4
+label InputHandler_5
+label InputHandler_4
+label InputHandler_0
+    push constant 0
+    return
+function InputHandler.isLeftPressed 1
+    push argument 0
+    pop pointer 0
+    call Keyboard.keyPressed 0
+    pop local 0
+    push local 0
+    push constant 130
+    eq
+    not
+    if-goto InputHandler_7
+    push this 4
+    not
+    not
+    if-goto InputHandler_9
+    push constant 1
+    neg
+    pop this 4
+    push constant 0
+    pop this 10
+    push constant 1
+    neg
+    return
+    goto InputHandler_8
+label InputHandler_9
+    push this 10
+    push constant 1
+    add
+    pop this 10
+    push this 10
+    push this 2
+    gt
+    not
+    if-goto InputHandler_11
+    push constant 1
+    neg
+    return
+    goto InputHandler_10
+label InputHandler_11
+label InputHandler_10
+label InputHandler_8
+    goto InputHandler_6
+label InputHandler_7
+    push constant 0
+    pop this 4
+    push constant 0
+    pop this 10
+label InputHandler_6
+    push constant 0
+    return
+function InputHandler.isRightPressed 1
+    push argument 0
+    pop pointer 0
+    call Keyboard.keyPressed 0
+    pop local 0
+    push local 0
+    push constant 132
+    eq
+    not
+    if-goto InputHandler_13
+    push this 5
+    not
+    not
+    if-goto InputHandler_15
+    push constant 1
+    neg
+    pop this 5
+    push constant 0
+    pop this 11
+    push constant 1
+    neg
+    return
+    goto InputHandler_14
+label InputHandler_15
+    push this 11
+    push constant 1
+    add
+    pop this 11
+    push this 11
+    push this 2
+    gt
+    not
+    if-goto InputHandler_17
+    push constant 1
+    neg
+    return
+    goto InputHandler_16
+label InputHandler_17
+label InputHandler_16
+label InputHandler_14
+    goto InputHandler_12
+label InputHandler_13
+    push constant 0
+    pop this 5
+    push constant 0
+    pop this 11
+label InputHandler_12
+    push constant 0
+    return
+function InputHandler.isDownPressed 1
+    push argument 0
+    pop pointer 0
+    call Keyboard.keyPressed 0
+    pop local 0
+    push local 0
+    push constant 133
+    eq
+    not
+    if-goto InputHandler_19
+    push this 6
+    not
+    not
+    if-goto InputHandler_21
+    push constant 1
+    neg
+    pop this 6
+    push constant 0
+    pop this 12
+    push constant 1
+    neg
+    return
+    goto InputHandler_20
+label InputHandler_21
+    push this 12
+    push constant 1
+    add
+    pop this 12
+    push this 12
+    push constant 1
+    gt
+    not
+    if-goto InputHandler_23
+    push constant 1
+    neg
+    return
+    goto InputHandler_22
+label InputHandler_23
+label InputHandler_22
+label InputHandler_20
+    goto InputHandler_18
+label InputHandler_19
+    push constant 0
+    pop this 6
+    push constant 0
+    pop this 12
+label InputHandler_18
+    push constant 0
+    return
+function InputHandler.isUpPressed 1
+    push argument 0
+    pop pointer 0
+    call Keyboard.keyPressed 0
+    pop local 0
+    push local 0
+    push constant 131
+    eq
+    not
+    if-goto InputHandler_25
+    push this 7
+    not
+    not
+    if-goto InputHandler_27
+    push constant 1
+    neg
+    pop this 7
+    push constant 1
+    neg
+    return
+    goto InputHandler_26
+label InputHandler_27
+label InputHandler_26
+    goto InputHandler_24
+label InputHandler_25
+    push constant 0
+    pop this 7
+label InputHandler_24
+    push constant 0
+    return
+function InputHandler.isSpacePressed 1
+    push argument 0
+    pop pointer 0
+    call Keyboard.keyPressed 0
+    pop local 0
+    push local 0
+    push constant 32
+    eq
+    not
+    if-goto InputHandler_29
+    push this 8
+    not
+    not
+    if-goto InputHandler_31
+    push constant 1
+    neg
+    pop this 8
+    push constant 1
+    neg
+    return
+    goto InputHandler_30
+label InputHandler_31
+label InputHandler_30
+    goto InputHandler_28
+label InputHandler_29
+    push constant 0
+    pop this 8
+label InputHandler_28
+    push constant 0
+    return
+function InputHandler.isRestartPressed 1
+    push argument 0
+    pop pointer 0
+    call Keyboard.keyPressed 0
+    pop local 0
+    push local 0
+    push constant 82
+    eq
+    push local 0
+    push constant 114
+    eq
+    or
+    not
+    if-goto InputHandler_33
+    push this 9
+    not
+    not
+    if-goto InputHandler_35
+    push constant 1
+    neg
+    pop this 9
+    push constant 1
+    neg
+    return
+    goto InputHandler_34
+label InputHandler_35
+label InputHandler_34
+    goto InputHandler_32
+label InputHandler_33
+    push constant 0
+    pop this 9
+label InputHandler_32
+    push constant 0
+    return
+function InputHandler.isQuitPressed 1
+    push argument 0
+    pop pointer 0
+    call Keyboard.keyPressed 0
+    pop local 0
+    push local 0
+    push constant 81
+    eq
+    push local 0
+    push constant 113
+    eq
+    or
+    return
+function InputHandler.setRepeatRate 0
+    push argument 0
+    pop pointer 0
+    push argument 1
+    pop this 2
+    push argument 2
+    pop this 3
+    push constant 0
+    return
+function InputHandler.reset 0
+    push argument 0
+    pop pointer 0
+    push constant 0
+    pop this 0
+    push constant 0
+    pop this 1
+    push constant 0
+    pop this 4
+    push constant 0
+    pop this 5
+    push constant 0
+    pop this 6
+    push constant 0
+    pop this 7
+    push constant 0
+    pop this 8
+    push constant 0
+    pop this 9
+    push constant 0
+    pop this 10
+    push constant 0
+    pop this 11
+    push constant 0
+    pop this 12
+    push constant 0
+    return
+function InputHandler.dispose 0
+    push argument 0
+    pop pointer 0
+    push pointer 0
+    call Memory.deAlloc 1
+    pop temp 0
+    push constant 0
+    return

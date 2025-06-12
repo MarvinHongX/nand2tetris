@@ -1,0 +1,280 @@
+class Board {
+    field Array board;
+    field int width, height;
+    
+    constructor Board new() {
+        var int i, j;
+        var Array row;
+        
+        let width = 10;
+        let height = 20;
+        
+        // Initialize game board
+        let board = Array.new(height);
+        let i = 0;
+        while (i < height) {
+            let row = Array.new(width);
+            let board[i] = row;
+            let j = 0;
+            while (j < width) {
+                let row[j] = 0; // 0 = empty cell
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+        
+        return this;
+    }
+    
+    method int getWidth() {
+        return width;
+    }
+    
+    method int getHeight() {
+        return height;
+    }
+    
+    // Check if specific position is empty
+    method boolean isEmpty(int x, int y) {
+        var Array row;
+        
+        if ((y < 0) | (y > 19) | (x < 0) | (x > 9)) {
+            return false;
+        }
+        
+        let row = board[y];
+        if (row = 0) {
+            return true;
+        }
+        
+        return row[x] = 0;
+    }
+    
+    // Set block at specific position
+    method void setBlock(int x, int y, int value) {
+        var Array row;
+        
+        if ((y < 0) | (y > 19) | (x < 0) | (x > 9)) {
+            return;
+        }
+        
+        let row = board[y];
+        if (~(row = 0)) {
+            let row[x] = value;
+        }
+        
+        return;
+    }
+    
+    // Get block value at specific position
+    method int getBlock(int x, int y) {
+        var Array row;
+        
+        if ((y < 0) | (y > 19) | (x < 0) | (x > 9)) {
+            return 1;
+        }
+        
+        let row = board[y];
+        if (row = 0) {
+            return 0;
+        }
+        
+        return row[x];
+    }
+    
+    // Check if tetromino can be placed at specific position
+    method boolean canPlaceTetromino(Tetromino piece) {
+        var int i, blockX, blockY;
+        
+        if (piece = 0) {
+            return false;
+        }
+        
+        let i = 0;
+        while (i < 4) {
+            let blockX = piece.getX() + piece.getBlockX(i);
+            let blockY = piece.getY() + piece.getBlockY(i);
+            
+            if (~isEmpty(blockX, blockY)) {
+                return false;
+            }
+            
+            let i = i + 1;
+        }
+        
+        return true;
+    }
+    
+    // Lock tetromino to board
+    method void placeTetromino(Tetromino piece) {
+        var int i, blockX, blockY;
+        
+        if (piece = 0) {
+            return;
+        }
+        
+        let i = 0;
+        while (i < 4) {
+            let blockX = piece.getX() + piece.getBlockX(i);
+            let blockY = piece.getY() + piece.getBlockY(i);
+            
+            do setBlock(blockX, blockY, 1);
+            
+            let i = i + 1;
+        }
+        
+        return;
+    }
+    
+    // Check if specific line is completely filled
+    method boolean isLineFull(int row) {
+        var int col;
+        var Array currentRow;
+        
+        if ((row < 0) | (row > 19)) {
+            return false;
+        }
+        
+        let currentRow = board[row];
+        if (currentRow = 0) {
+            return false;
+        }
+        
+        let col = 0;
+        while (col < width) {
+            if (currentRow[col] = 0) {
+                return false;
+            }
+            let col = col + 1;
+        }
+        
+        return true;
+    }
+    
+    // Copy contents of one line to another
+    method void copyLine(int fromRow, int toRow) {
+        var Array fromArray, toArray;
+        var int col;
+        
+        if ((fromRow < 0) | (fromRow > 19) | (toRow < 0) | (toRow > 19)) {
+            return;
+        }
+        
+        let fromArray = board[fromRow];
+        let toArray = board[toRow];
+        
+        if ((fromArray = 0) | (toArray = 0)) {
+            return;
+        }
+        
+        let col = 0;
+        while (col < width) {
+            let toArray[col] = fromArray[col];
+            let col = col + 1;
+        }
+        
+        return;
+    }
+    
+    // Clear specific line completely
+    method void clearLine(int row) {
+        var int col;
+        var Array currentRow;
+        
+        if ((row < 0) | (row > 19)) {
+            return;
+        }
+        
+        let currentRow = board[row];
+        if (currentRow = 0) {
+            return;
+        }
+        
+        let col = 0;
+        while (col < width) {
+            let currentRow[col] = 0;
+            let col = col + 1;
+        }
+        
+        return;
+    }
+    
+    // Clear completed lines and naturally drop blocks above
+    method int clearFullLines() {
+        var int writeRow, readRow, linesCleared;
+        var boolean lineWasCleared;
+        
+        let linesCleared = 0;
+        let writeRow = height - 1; // Start writing from bottom
+        let readRow = height - 1;  // Start reading from bottom
+        
+        // Scan from bottom to top
+        while (readRow > -1) {
+            let lineWasCleared = false;
+            
+            if (isLineFull(readRow)) {
+                // Clear completed line (read only, don't write)
+                let linesCleared = linesCleared + 1;
+                let lineWasCleared = true;
+            } else {
+                // Copy incomplete line downward
+                if (~(writeRow = readRow)) {
+                    do copyLine(readRow, writeRow);
+                }
+                let writeRow = writeRow - 1;
+            }
+            
+            let readRow = readRow - 1;
+        }
+        
+        // Fill remaining top lines with empty lines
+        while (writeRow > -1) {
+            do clearLine(writeRow);
+            let writeRow = writeRow - 1;
+        }
+        
+        return linesCleared;
+    }
+    
+    // Clear board (clear contents only without memory deallocation)
+    method void clear() {
+        var int i, j;
+        var Array row;
+        
+        let i = 0;
+        while (i < height) {
+            let row = board[i];
+            if (~(row = 0)) {
+                let j = 0;
+                while (j < width) {
+                    let row[j] = 0;
+                    let j = j + 1;
+                }
+            }
+            let i = i + 1;
+        }
+        
+        return;
+    }
+    
+    method void dispose() {
+        var int i;
+        var Array row;
+        
+        // Deallocate board memory
+        if (~(board = 0)) {
+            let i = 0;
+            while (i < height) {
+                let row = board[i];
+                if (~(row = 0)) {
+                    do Memory.deAlloc(row);
+                }
+                let i = i + 1;
+            }
+            do Memory.deAlloc(board);
+        }
+        
+        do Memory.deAlloc(this);
+        return;
+    }
+}

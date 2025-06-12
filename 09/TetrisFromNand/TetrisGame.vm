@@ -1,0 +1,422 @@
+function TetrisGame.new 0
+    push constant 3
+    call Memory.alloc 1
+    pop pointer 0
+    call GameLogic.new 0
+    pop this 0
+    call GameRenderer.new 0
+    pop this 1
+    call InputHandler.new 0
+    pop this 2
+    push pointer 0
+    return
+function TetrisGame.run 11
+    push argument 0
+    pop pointer 0
+    push constant 0
+    pop local 0
+    push constant 0
+    pop local 2
+    push constant 1
+    neg
+    pop local 3
+    push constant 0
+    pop local 4
+    push constant 0
+    pop local 5
+    push constant 0
+    pop local 6
+    push constant 0
+    pop local 7
+    push constant 150
+    pop local 8
+    push this 2
+    push constant 4
+    push constant 1
+    call InputHandler.setRepeatRate 3
+    pop temp 0
+label TetrisGame_0
+    push constant 1
+    neg
+    not
+    if-goto TetrisGame_1
+    push this 2
+    call InputHandler.update 1
+    pop temp 0
+    push constant 0
+    pop local 2
+    push this 0
+    call GameLogic.getDropSpeed 1
+    pop local 1
+    push this 0
+    call GameLogic.getPieceGenerator 1
+    pop local 9
+    push local 9
+    call PieceGenerator.getNextPieceType 1
+    pop local 10
+    push local 7
+    push constant 1
+    add
+    pop local 7
+    push local 7
+    push local 8
+    gt
+    not
+    if-goto TetrisGame_3
+    push this 0
+    call GameLogic.isGameOver 1
+    not
+    not
+    if-goto TetrisGame_5
+    push this 0
+    call GameLogic.forceMemoryCleanup 1
+    pop temp 0
+    goto TetrisGame_4
+label TetrisGame_5
+label TetrisGame_4
+    push constant 0
+    pop local 7
+    push constant 200
+    push this 0
+    call GameLogic.getLevel 1
+    push constant 5
+    call Math.multiply 2
+    sub
+    pop local 8
+    push local 8
+    push constant 100
+    lt
+    not
+    if-goto TetrisGame_7
+    push constant 100
+    pop local 8
+    goto TetrisGame_6
+label TetrisGame_7
+label TetrisGame_6
+    goto TetrisGame_2
+label TetrisGame_3
+label TetrisGame_2
+    push local 5
+    not
+    push this 0
+    call GameLogic.isGameOver 1
+    and
+    not
+    if-goto TetrisGame_9
+    push constant 0
+    pop local 6
+    push constant 1
+    neg
+    pop local 3
+    goto TetrisGame_8
+label TetrisGame_9
+label TetrisGame_8
+    push this 0
+    call GameLogic.isGameOver 1
+    pop local 5
+    push this 0
+    call GameLogic.isGameOver 1
+    not
+    not
+    if-goto TetrisGame_11
+    push constant 0
+    pop local 6
+    push this 2
+    call InputHandler.isLeftPressed 1
+    not
+    if-goto TetrisGame_13
+    push this 0
+    call GameLogic.moveLeft 1
+    not
+    if-goto TetrisGame_15
+    push constant 1
+    neg
+    pop local 2
+    goto TetrisGame_14
+label TetrisGame_15
+label TetrisGame_14
+    goto TetrisGame_12
+label TetrisGame_13
+label TetrisGame_12
+    push this 2
+    call InputHandler.isRightPressed 1
+    not
+    if-goto TetrisGame_17
+    push this 0
+    call GameLogic.moveRight 1
+    not
+    if-goto TetrisGame_19
+    push constant 1
+    neg
+    pop local 2
+    goto TetrisGame_18
+label TetrisGame_19
+label TetrisGame_18
+    goto TetrisGame_16
+label TetrisGame_17
+label TetrisGame_16
+    push this 2
+    call InputHandler.isUpPressed 1
+    not
+    if-goto TetrisGame_21
+    push this 0
+    push constant 1
+    neg
+    call GameLogic.rotate 2
+    not
+    if-goto TetrisGame_23
+    push constant 1
+    neg
+    pop local 2
+    goto TetrisGame_22
+label TetrisGame_23
+label TetrisGame_22
+    goto TetrisGame_20
+label TetrisGame_21
+label TetrisGame_20
+    push this 2
+    call InputHandler.isDownPressed 1
+    not
+    if-goto TetrisGame_25
+    push this 0
+    call GameLogic.moveDown 1
+    not
+    if-goto TetrisGame_27
+    push constant 1
+    neg
+    pop local 2
+    goto TetrisGame_26
+label TetrisGame_27
+label TetrisGame_26
+    goto TetrisGame_24
+label TetrisGame_25
+label TetrisGame_24
+    push this 2
+    call InputHandler.isSpacePressed 1
+    not
+    if-goto TetrisGame_29
+    push this 0
+    call GameLogic.hardDrop 1
+    push constant 0
+    gt
+    not
+    if-goto TetrisGame_31
+    push constant 1
+    neg
+    pop local 2
+    goto TetrisGame_30
+label TetrisGame_31
+label TetrisGame_30
+    goto TetrisGame_28
+label TetrisGame_29
+label TetrisGame_28
+    push local 0
+    push constant 1
+    add
+    pop local 0
+    push local 0
+    push local 1
+    gt
+    not
+    if-goto TetrisGame_33
+    push this 0
+    call GameLogic.tick 1
+    not
+    if-goto TetrisGame_35
+    push constant 1
+    neg
+    pop local 2
+    goto TetrisGame_34
+label TetrisGame_35
+label TetrisGame_34
+    push constant 0
+    pop local 0
+    goto TetrisGame_32
+label TetrisGame_33
+label TetrisGame_32
+    push local 3
+    push local 4
+    not
+    and
+    not
+    if-goto TetrisGame_37
+    push this 1
+    push this 0
+    call GameLogic.getBoard 1
+    push this 0
+    call GameLogic.getCurrentPiece 1
+    push this 0
+    call GameLogic.getGhostPiece 1
+    push this 0
+    call GameLogic.getScore 1
+    push this 0
+    call GameLogic.getLevel 1
+    push this 0
+    call GameLogic.getLinesCleared 1
+    push local 10
+    call GameRenderer.renderInitialWithNext 8
+    pop temp 0
+    push constant 1
+    neg
+    pop local 4
+    push constant 0
+    pop local 3
+    goto TetrisGame_36
+label TetrisGame_37
+    push local 2
+    not
+    if-goto TetrisGame_39
+    push this 1
+    push this 0
+    call GameLogic.getBoard 1
+    push this 0
+    call GameLogic.getCurrentPiece 1
+    push this 0
+    call GameLogic.getGhostPiece 1
+    push this 0
+    call GameLogic.getScore 1
+    push this 0
+    call GameLogic.getLevel 1
+    push this 0
+    call GameLogic.getLinesCleared 1
+    push local 10
+    call GameRenderer.renderWithNext 8
+    pop temp 0
+    goto TetrisGame_38
+label TetrisGame_39
+label TetrisGame_38
+label TetrisGame_36
+    goto TetrisGame_10
+label TetrisGame_11
+    push local 3
+    push local 6
+    not
+    or
+    not
+    if-goto TetrisGame_41
+    push this 1
+    push this 0
+    call GameLogic.getBoard 1
+    push this 0
+    call GameLogic.getCurrentPiece 1
+    push this 0
+    call GameLogic.getGhostPiece 1
+    push this 0
+    call GameLogic.getScore 1
+    push this 0
+    call GameLogic.getLevel 1
+    push this 0
+    call GameLogic.getLinesCleared 1
+    push local 10
+    call GameRenderer.renderWithNext 8
+    pop temp 0
+    push this 1
+    call GameRenderer.drawGameOver 1
+    pop temp 0
+    push constant 0
+    pop local 3
+    push constant 1
+    neg
+    pop local 6
+    goto TetrisGame_40
+label TetrisGame_41
+label TetrisGame_40
+label TetrisGame_10
+    push this 2
+    call InputHandler.isRestartPressed 1
+    not
+    if-goto TetrisGame_43
+    push this 0
+    call GameLogic.restart 1
+    pop temp 0
+    push this 1
+    call GameRenderer.reset 1
+    pop temp 0
+    push this 2
+    call InputHandler.reset 1
+    pop temp 0
+    push constant 1
+    neg
+    pop local 2
+    push constant 1
+    neg
+    pop local 3
+    push constant 0
+    pop local 4
+    push constant 0
+    pop local 6
+    push constant 0
+    pop local 5
+    push constant 0
+    pop local 7
+    push constant 150
+    pop local 8
+    goto TetrisGame_42
+label TetrisGame_43
+label TetrisGame_42
+    push this 2
+    call InputHandler.isQuitPressed 1
+    not
+    if-goto TetrisGame_45
+    push constant 0
+    return
+    goto TetrisGame_44
+label TetrisGame_45
+label TetrisGame_44
+    push constant 25
+    call Sys.wait 1
+    pop temp 0
+    goto TetrisGame_0
+label TetrisGame_1
+    push constant 0
+    return
+function TetrisGame.dispose 0
+    push argument 0
+    pop pointer 0
+    push this 2
+    push constant 0
+    eq
+    not
+    not
+    if-goto TetrisGame_47
+    push this 2
+    call InputHandler.dispose 1
+    pop temp 0
+    push constant 0
+    pop this 2
+    goto TetrisGame_46
+label TetrisGame_47
+label TetrisGame_46
+    push this 0
+    push constant 0
+    eq
+    not
+    not
+    if-goto TetrisGame_49
+    push this 0
+    call GameLogic.dispose 1
+    pop temp 0
+    push constant 0
+    pop this 0
+    goto TetrisGame_48
+label TetrisGame_49
+label TetrisGame_48
+    push this 1
+    push constant 0
+    eq
+    not
+    not
+    if-goto TetrisGame_51
+    push this 1
+    call GameRenderer.dispose 1
+    pop temp 0
+    push constant 0
+    pop this 1
+    goto TetrisGame_50
+label TetrisGame_51
+label TetrisGame_50
+    push pointer 0
+    call Memory.deAlloc 1
+    pop temp 0
+    push constant 0
+    return

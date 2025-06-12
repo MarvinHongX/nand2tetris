@@ -1,0 +1,433 @@
+class GameLogic {
+    field Board board;
+    field Tetromino currentPiece;
+    field Tetromino ghostPiece; // Reusable ghost piece
+    field PieceGenerator pieceGenerator;
+    field int score;
+    field int level;
+    field int linesCleared;
+    field boolean gameOver;
+    field boolean pieceNeedsReplacement;
+    field boolean ghostPieceValid; // Check if ghost piece is valid
+    
+    constructor GameLogic new() {
+        let board = Board.new();
+        let pieceGenerator = PieceGenerator.new();
+        let currentPiece = 0;
+        let ghostPiece = 0;
+        let score = 0;
+        let level = 1;
+        let linesCleared = 0;
+        let gameOver = false;
+        let pieceNeedsReplacement = true;
+        let ghostPieceValid = false;
+        
+        // Generate first piece
+        do spawnNewPiece();
+        
+        return this;
+    }
+    
+    method int getScore() {
+        return score;
+    }
+    
+    method int getLevel() {
+        return level;
+    }
+    
+    method int getLinesCleared() {
+        return linesCleared;
+    }
+    
+    // Much faster drop speed calculation
+    method int getDropSpeed() {
+        if (level = 1) { return 6; }
+        if (level = 2) { return 5; }
+        if (level = 3) { return 4; }
+        if (level = 4) { return 3; }
+        if (level = 5) { return 3; }
+        if (level = 6) { return 2; }
+        if (level = 7) { return 2; }
+        if (level = 8) { return 1; }
+        if (level = 9) { return 1; }
+        return 1; // Level 10+ maximum speed
+    }
+    
+    method boolean isGameOver() {
+        return gameOver;
+    }
+    
+    method Board getBoard() {
+        return board;
+    }
+    
+    method Tetromino getCurrentPiece() {
+        return currentPiece;
+    }
+    
+    method Tetromino getGhostPiece() {
+        if (ghostPieceValid) {
+            return ghostPiece;
+        }
+        return 0;
+    }
+    
+    method PieceGenerator getPieceGenerator() {
+        return pieceGenerator;
+    }
+    
+    // Check game over condition
+    method boolean checkGameOverCondition() {
+        var int col;
+        
+        let col = 0;
+        while (col < 10) {
+            if ((board.getBlock(col, 0) = 1) | (board.getBlock(col, 1) = 1)) {
+                return true;
+            }
+            let col = col + 1;
+        }
+        
+        return false;
+    }
+    
+    // Memory-efficient ghost piece update (reuse existing ghost piece)
+    method void updateGhostPiece() {
+        var int targetY;
+        
+        if (currentPiece = 0) {
+            let ghostPieceValid = false;
+            return;
+        }
+        
+        // Create new ghost piece if none exists, otherwise reuse
+        if (ghostPiece = 0) {
+            let ghostPiece = Tetromino.new(currentPiece.getType(), currentPiece.getX(), currentPiece.getY());
+        } else {
+            // Reuse existing ghost piece - update properties only
+            do ghostPiece.setPosition(currentPiece.getX(), currentPiece.getY());
+            do ghostPiece.setType(currentPiece.getType());
+        }
+        
+        // Match ghost piece rotation state to current piece
+        do ghostPiece.setRotation(currentPiece.getRotation());
+        
+        // Drop ghost piece to bottom
+        let targetY = currentPiece.getY();
+        while (board.canPlaceTetromino(ghostPiece)) {
+            let targetY = ghostPiece.getY() + 1;
+            do ghostPiece.setPosition(ghostPiece.getX(), targetY);
+        }
+        
+        // Restore to last valid position
+        do ghostPiece.setPosition(ghostPiece.getX(), targetY - 1);
+        let ghostPieceValid = true;
+        
+        return;
+    }
+    
+    // Spawn new piece
+    method void spawnNewPiece() {
+        if (~(currentPiece = 0)) {
+            do currentPiece.dispose();
+            let currentPiece = 0;
+        }
+        
+        // Don't dispose ghost piece, keep it for reuse
+        let ghostPieceValid = false;
+        
+        if (checkGameOverCondition()) {
+            let gameOver = true;
+            return;
+        }
+        
+        let currentPiece = pieceGenerator.generateNewPiece(4, 0, score);
+        
+        if (currentPiece = 0) {
+            let gameOver = true;
+            return;
+        }
+        
+        if (~board.canPlaceTetromino(currentPiece)) {
+            let gameOver = true;
+            return;
+        }
+        
+        // Update ghost piece
+        do updateGhostPiece();
+        
+        let pieceNeedsReplacement = false;
+        return;
+    }
+    
+    // Move piece left
+    method boolean moveLeft() {
+        var boolean canMove;
+        
+        if (gameOver | (currentPiece = 0)) {
+            return false;
+        }
+        
+        do currentPiece.moveLeft();
+        let canMove = board.canPlaceTetromino(currentPiece);
+        
+        if (~canMove) {
+            do currentPiece.moveRight();
+        } else {
+            // Update ghost piece if moved
+            do updateGhostPiece();
+        }
+        
+        return canMove;
+    }
+    
+    // Move piece right
+    method boolean moveRight() {
+        var boolean canMove;
+        
+        if (gameOver | (currentPiece = 0)) {
+            return false;
+        }
+        
+        do currentPiece.moveRight();
+        let canMove = board.canPlaceTetromino(currentPiece);
+        
+        if (~canMove) {
+            do currentPiece.moveLeft();
+        } else {
+            // Update ghost piece if moved
+            do updateGhostPiece();
+        }
+        
+        return canMove;
+    }
+    
+    // Move piece down
+    method boolean moveDown() {
+        var boolean canMove;
+        
+        if (gameOver | (currentPiece = 0)) {
+            return false;
+        }
+        
+        do currentPiece.moveDown();
+        let canMove = board.canPlaceTetromino(currentPiece);
+        
+        if (~canMove) {
+            do currentPiece.setPosition(currentPiece.getX(), currentPiece.getY() - 1);
+            return false;
+        } else {
+            // Update ghost piece if moved down
+            do updateGhostPiece();
+        }
+        
+        return true;
+    }
+    
+    // Rotate piece
+    method boolean rotate(boolean clockwise) {
+        var boolean canRotate;
+        var int originalX, originalY, originalRotation;
+        
+        if (gameOver | (currentPiece = 0)) {
+            return false;
+        }
+        
+        let originalX = currentPiece.getX();
+        let originalY = currentPiece.getY();
+        let originalRotation = currentPiece.getRotation();
+        
+        if (clockwise) {
+            do currentPiece.rotate();
+        } else {
+            do currentPiece.rotateReverse();
+        }
+        
+        let canRotate = board.canPlaceTetromino(currentPiece);
+        
+        if (~canRotate) {
+            // Simple wall kick
+            do currentPiece.setPosition(originalX - 1, originalY);
+            let canRotate = board.canPlaceTetromino(currentPiece);
+            
+            if (~canRotate) {
+                do currentPiece.setPosition(originalX + 1, originalY);
+                let canRotate = board.canPlaceTetromino(currentPiece);
+            }
+            
+            if (~canRotate) {
+                // Restore original state if failed
+                do currentPiece.setPosition(originalX, originalY);
+                do currentPiece.setRotation(originalRotation);
+            }
+        }
+        
+        if (canRotate) {
+            // Update ghost piece if rotated
+            do updateGhostPiece();
+        }
+        
+        return canRotate;
+    }
+    
+    // Instant hard drop (Tetris style)
+    method int hardDrop() {
+        var int dropDistance;
+        
+        if (gameOver | (currentPiece = 0)) {
+            return 0;
+        }
+        
+        // Move instantly to ghost piece position
+        if (ghostPieceValid & (~(ghostPiece = 0))) {
+            let dropDistance = ghostPiece.getY() - currentPiece.getY();
+            do currentPiece.setPosition(ghostPiece.getX(), ghostPiece.getY());
+        } else {
+            let dropDistance = 0;
+        }
+        
+        let score = score + (dropDistance * 2); // Hard drop bonus
+        
+        // Lock piece immediately
+        do lockPiece();
+        
+        return dropDistance;
+    }
+    
+    // Lock current piece to board
+    method void lockPiece() {
+        var int clearedLinesThisTurn;
+        
+        if (gameOver | (currentPiece = 0)) {
+            return;
+        }
+        
+        do board.placeTetromino(currentPiece);
+        
+        let clearedLinesThisTurn = board.clearFullLines();
+        let linesCleared = linesCleared + clearedLinesThisTurn;
+        
+        // Score calculation (higher score rewards)
+        if (clearedLinesThisTurn = 1) {
+            let score = score + (150 * level); // was 100 -> 150
+        }
+        if (clearedLinesThisTurn = 2) {
+            let score = score + (400 * level); // was 300 -> 400
+        }
+        if (clearedLinesThisTurn = 3) {
+            let score = score + (700 * level); // was 500 -> 700
+        }
+        if (clearedLinesThisTurn = 4) {
+            let score = score + (1200 * level); // was 800 -> 1200
+        }
+        
+        // Faster level up (every 8 lines)
+        if (linesCleared > (level * 8)) {
+            let level = level + 1;
+            if (level > 20) {
+                let level = 20;
+            }
+        }
+        
+        let pieceNeedsReplacement = true;
+        let ghostPieceValid = false; // Invalidate ghost piece
+        
+        return;
+    }
+    
+    // Handle automatic falling
+    method boolean tick() {
+        if (gameOver | (currentPiece = 0)) {
+            return false;
+        }
+        
+        if (pieceNeedsReplacement) {
+            do spawnNewPiece();
+            return true;
+        }
+        
+        if (moveDown()) {
+            let score = score + 1;
+            return true;
+        } else {
+            do lockPiece();
+            return false;
+        }
+    }
+    
+    // Force memory cleanup method
+    method void forceMemoryCleanup() {
+        // Clean up memory by temporarily disposing and recreating ghost piece
+        if (~(ghostPiece = 0)) {
+            do ghostPiece.dispose();
+            let ghostPiece = 0;
+            let ghostPieceValid = false;
+        }
+        
+        // Recreate ghost piece if needed
+        if (~(currentPiece = 0)) {
+            do updateGhostPiece();
+        }
+        
+        return;
+    }
+    
+    // Restart game
+    method void restart() {
+        if (~(currentPiece = 0)) {
+            do currentPiece.dispose();
+            let currentPiece = 0;
+        }
+        
+        // Complete cleanup of ghost piece
+        if (~(ghostPiece = 0)) {
+            do ghostPiece.dispose();
+            let ghostPiece = 0;
+        }
+        let ghostPieceValid = false;
+        
+        if (~(board = 0)) {
+            do board.clear();
+        }
+        
+        if (~(pieceGenerator = 0)) {
+            do pieceGenerator.reset();
+        }
+        
+        let score = 0;
+        let level = 1;
+        let linesCleared = 0;
+        let gameOver = false;
+        let pieceNeedsReplacement = true;
+        
+        do spawnNewPiece();
+        
+        return;
+    }
+    
+    method void dispose() {
+        if (~(currentPiece = 0)) {
+            do currentPiece.dispose();
+            let currentPiece = 0;
+        }
+        
+        if (~(ghostPiece = 0)) {
+            do ghostPiece.dispose();
+            let ghostPiece = 0;
+        }
+        
+        if (~(pieceGenerator = 0)) {
+            do pieceGenerator.dispose();
+            let pieceGenerator = 0;
+        }
+        
+        if (~(board = 0)) {
+            do board.dispose();
+            let board = 0;
+        }
+        
+        do Memory.deAlloc(this);
+        return;
+    }
+}

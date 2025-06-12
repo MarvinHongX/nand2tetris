@@ -1,0 +1,156 @@
+class PieceGenerator {
+    field int lastPiece1;
+    field int lastPiece2;
+    field int randomSeed;
+    field int nextPieceType; // Next piece type
+    field int sequenceIndex; // Predefined sequence index
+    
+    constructor PieceGenerator new() {
+        let lastPiece1 = -1;
+        let lastPiece2 = -1;
+        let randomSeed = 197; // Changed from 73 to 197 for different pattern
+        let nextPieceType = -1;
+        let sequenceIndex = 0;
+        
+        // Mix the seed further for more randomness
+        let randomSeed = (randomSeed * 17 + 29) & 255;
+        
+        // Generate first next piece
+        do generateNextPieceType();
+        
+        return this;
+    }
+    
+    // Simple pseudo-random sequence generation (7 pieces per group with all pieces included)
+    method int getNextInSequence() {
+        var int group, position, pieceType;
+        
+        // Calculate quotient and remainder when sequence index is divided by 7
+        let group = sequenceIndex / 7;
+        let position = sequenceIndex - (group * 7);
+        
+        // Different starting points for each group in circular pattern
+        if ((group & 1) = 0) {
+            // Even group: 0,1,2,3,4,5,6
+            let pieceType = position;
+        } else {
+            // Odd group: 6,5,4,3,2,1,0 (reverse order)
+            let pieceType = 6 - position;
+        }
+        
+        // Add slight variation based on seed
+        let pieceType = pieceType + (randomSeed & 3);
+        while (pieceType > 6) {
+            let pieceType = pieceType - 7;
+        }
+        
+        let sequenceIndex = sequenceIndex + 1;
+        return pieceType;
+    }
+    
+    // Generate next piece type
+    method void generateNextPieceType() {
+        var int attempts, candidate;
+        var boolean isValid;
+        
+        let attempts = 0;
+        let isValid = false;
+        
+        // Try up to 15 times
+        while ((~isValid) & (attempts < 15)) {
+            let candidate = getNextInSequence();
+            
+            // Prevent same piece 3 times in a row
+            if ((candidate = lastPiece1) & (lastPiece1 = lastPiece2)) {
+                let attempts = attempts + 1;
+                // Change seed to get different result
+                let randomSeed = randomSeed + 17;
+            } else {
+                let nextPieceType = candidate;
+                let isValid = true;
+            }
+        }
+        
+        // Force different piece if 15 attempts failed
+        if (~isValid) {
+            let nextPieceType = lastPiece1 + 1;
+            if (nextPieceType > 6) {
+                let nextPieceType = 0;
+            }
+        }
+        
+        return;
+    }
+    
+    // Return next piece type (for preview)
+    method int getNextPieceType() {
+        return nextPieceType;
+    }
+    
+    // Calculate starting X position by piece type
+    method int getStartX(int pieceType) {
+        if (pieceType = 0) { return 3; } // I piece
+        if (pieceType = 1) { return 4; } // O piece
+        if (pieceType = 2) { return 3; } // T piece
+        if (pieceType = 3) { return 3; } // S piece
+        if (pieceType = 4) { return 3; } // Z piece
+        if (pieceType = 5) { return 3; } // J piece
+        if (pieceType = 6) { return 3; } // L piece
+        return 3;
+    }
+    
+    // Generate new tetromino piece (next piece becomes current piece)
+    method Tetromino generateNewPiece(int defaultX, int startY, int currentScore) {
+        var int currentPieceType, startX;
+        var Tetromino tetromino;
+        
+        // Use next piece as current piece
+        let currentPieceType = nextPieceType;
+        
+        // Update previous pieces record
+        let lastPiece2 = lastPiece1;
+        let lastPiece1 = currentPieceType;
+        
+        // Use score for additional randomness
+        let randomSeed = (randomSeed * 3 + currentScore + 13) & 255;
+        
+        // Generate new next piece
+        do generateNextPieceType();
+        
+        // Calculate starting X position for piece type
+        let startX = getStartX(currentPieceType);
+        
+        // Create new tetromino
+        let tetromino = Tetromino.new(currentPieceType, startX, startY);
+        
+        return tetromino;
+    }
+    
+    // Update random seed
+    method void updateSeed(int newSeed) {
+        let randomSeed = (randomSeed + newSeed) & 255;
+        return;
+    }
+    
+    // Reset state
+    method void reset() {
+        let lastPiece1 = -1;
+        let lastPiece2 = -1;
+        let randomSeed = 157; // Different seed for restart (was 123 -> 157)
+        let nextPieceType = -1;
+        let sequenceIndex = 0;
+        
+        // Mix the seed differently on restart
+        let randomSeed = (randomSeed * 23 + 41) & 255;
+        
+        // Generate new next piece
+        do generateNextPieceType();
+        
+        return;
+    }
+    
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}
