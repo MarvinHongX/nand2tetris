@@ -27,13 +27,10 @@ class TetrisGame {
         let cleanupCounter = 0;
         let memoryCleanupInterval = 150; // 더 자주 메모리 정리 (200 -> 150)
         
-        // Set faster input repeat speed (delay: 4 frames, interval: 1 frame)
-        do inputHandler.setRepeatRate(4, 1);
+        // Set faster input repeat speed (delay: 4 frames)
+        do inputHandler.setRepeatRate(4);
         
         while (true) {
-            // Update input state
-            do inputHandler.update();
-            
             let moved = false;
             let dropSpeed = gameLogic.getDropSpeed();
             

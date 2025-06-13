@@ -1,8 +1,5 @@
 class InputHandler {
-    field int lastKey;
-    field int keyHoldTime;
     field int repeatDelay;
-    field int repeatRate;
     field boolean leftPressed;
     field boolean rightPressed;
     field boolean downPressed;
@@ -14,10 +11,7 @@ class InputHandler {
     field int downHoldTime;
     
     constructor InputHandler new() {
-        let lastKey = 0;
-        let keyHoldTime = 0;
         let repeatDelay = 4;  // Faster repeat start (was 8 -> 4)
-        let repeatRate = 1;   // Faster repeat interval (was 3 -> 1)
         let leftPressed = false;
         let rightPressed = false;
         let downPressed = false;
@@ -30,42 +24,6 @@ class InputHandler {
         return this;
     }
     
-    // Update key input state
-    method void update() {
-        var int currentKey;
-        let currentKey = Keyboard.keyPressed();
-        
-        // Update state for each key
-        do updateKeyState(130, currentKey); // Left
-        do updateKeyState(132, currentKey); // Right
-        do updateKeyState(131, currentKey); // Up
-        do updateKeyState(133, currentKey); // Down
-        do updateKeyState(32, currentKey);  // Space
-        do updateKeyState(82, currentKey);  // R (uppercase)
-        do updateKeyState(114, currentKey); // r (lowercase)
-        do updateKeyState(81, currentKey);  // Q (uppercase)
-        do updateKeyState(113, currentKey); // q (lowercase)
-        
-        return;
-    }
-    
-    // Update individual key state
-    method void updateKeyState(int keyCode, int currentKey) {
-        if (currentKey = keyCode) {
-            if (lastKey = keyCode) {
-                let keyHoldTime = keyHoldTime + 1;
-            } else {
-                let keyHoldTime = 0;
-                let lastKey = keyCode;
-            }
-        } else {
-            if (lastKey = keyCode) {
-                let lastKey = 0;
-                let keyHoldTime = 0;
-            }
-        }
-        return;
-    }
     
     // Check left key press (faster repeat)
     method boolean isLeftPressed() {
@@ -201,16 +159,13 @@ class InputHandler {
     }
     
     // Set repeat speed (faster default values)
-    method void setRepeatRate(int delay, int rate) {
+    method void setRepeatRate(int delay) {
         let repeatDelay = delay;
-        let repeatRate = rate;
         return;
     }
     
     // Reset all key states
     method void reset() {
-        let lastKey = 0;
-        let keyHoldTime = 0;
         let leftPressed = false;
         let rightPressed = false;
         let downPressed = false;
