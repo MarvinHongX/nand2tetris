@@ -1,0 +1,422 @@
+class GameRenderer {
+    field int boardStartX, boardStartY;
+    field int blockSize;
+    field boolean uiDrawn;
+    field int lastScore;
+    
+    constructor GameRenderer new() {
+        let boardStartX = 197;
+        let boardStartY = 10;
+        let blockSize = 12;
+        let uiDrawn = false;
+        let lastScore = -1;
+        return this;
+    }
+    
+    // Clear only the game board area
+    method void clearBoard() {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(boardStartX, boardStartY, 317, 250);
+        return;
+    }
+    
+    // Draw UI (including next piece preview)
+    method void drawUI(int score, int level, int lines) {
+        var boolean scoreChanged;
+        let scoreChanged = ~(score = lastScore);
+        
+        if ((~uiDrawn) | scoreChanged) {
+            do Screen.setColor(true);
+
+            if (~uiDrawn) {
+                // TETRIS title
+                do Output.moveCursor(1, 2);
+                do Output.printString("TETRIS from Nand");
+
+                // Author info
+                do Output.moveCursor(3, 2);
+                do Output.printString("rhenee.com Presents");
+                do Output.moveCursor(4, 2);
+                do Output.printString("by Marvin Hong");
+                
+                // Control instructions
+                do Output.moveCursor(6, 2);
+                do Output.printString("ARROWS: Move/Rotate");
+                do Output.moveCursor(7, 2);
+                do Output.printString("SPACE: Hard Drop");
+                do Output.moveCursor(8, 2);
+                do Output.printString("R: Restart, Q: Quit");
+                
+                // NEXT label
+                do Output.moveCursor(7, 42);
+                do Output.printString("NEXT:");
+                
+                let uiDrawn = true;
+            }
+            
+            if (scoreChanged) {
+                // Clear score area and redraw
+                do Screen.setColor(false);
+                do Screen.drawRectangle(344, 16, 511, 48);
+                
+                do Screen.setColor(true);
+                do Output.moveCursor(1, 42);
+                do Output.printString("SCORE: ");
+                do Output.printInt(score);
+                
+                do Output.moveCursor(2, 42);
+                do Output.printString("LEVEL: ");
+                do Output.printInt(level);
+                
+                do Output.moveCursor(3, 42);
+                do Output.printString("LINES: ");
+                do Output.printInt(lines);
+                
+                let lastScore = score;
+            }
+        }
+
+        return;
+    }
+    
+    // Draw next piece preview (small size)
+    method void drawNextPiece(int nextPieceType) {
+        var int previewX, previewY, blockSize;
+        var int i, blockX, blockY, screenX, screenY;
+        
+        if (nextPieceType < 0) {
+            return;
+        }
+        
+        let previewX = 350; // Preview area start X
+        let previewY = 100;  // Preview area start Y (below NEXT label)
+        let blockSize = 8;  // Small block size
+        
+        // Clear preview area first
+        do Screen.setColor(false);
+        do Screen.drawRectangle(previewX, previewY, previewX + 40, previewY + 30);
+        
+        // Draw piece
+        do Screen.setColor(true);
+        
+        let i = 0;
+        while (i < 4) {
+            let blockX = getNextPieceBlockX(nextPieceType, i);
+            let blockY = getNextPieceBlockY(nextPieceType, i);
+            
+            let screenX = previewX + (blockX * blockSize);
+            let screenY = previewY + (blockY * blockSize);
+            
+            do Screen.drawRectangle(screenX, screenY, screenX + (blockSize - 1), screenY + (blockSize - 1));
+            
+            let i = i + 1;
+        }
+        
+        return;
+    }
+    
+    // Next piece block X coordinate (for preview, 0 rotation basis)
+    method int getNextPieceBlockX(int pieceType, int blockIndex) {
+        if (pieceType = 0) { // I piece
+            return blockIndex;
+        }
+        if (pieceType = 1) { // O piece
+            if ((blockIndex = 0) | (blockIndex = 2)) { return 0; }
+            return 1;
+        }
+        if (pieceType = 2) { // T piece
+            if (blockIndex = 0) { return 1; }
+            if (blockIndex = 1) { return 0; }
+            if (blockIndex = 2) { return 1; }
+            return 2;
+        }
+        if (pieceType = 3) { // S piece
+            if (blockIndex = 0) { return 1; }
+            if (blockIndex = 1) { return 2; }
+            if (blockIndex = 2) { return 0; }
+            return 1;
+        }
+        if (pieceType = 4) { // Z piece
+            if (blockIndex = 0) { return 0; }
+            if (blockIndex = 1) { return 1; }
+            if (blockIndex = 2) { return 1; }
+            return 2;
+        }
+        if (pieceType = 5) { // J piece
+            if (blockIndex = 0) { return 0; }
+            if (blockIndex = 1) { return 0; }
+            if (blockIndex = 2) { return 1; }
+            return 2;
+        }
+        if (pieceType = 6) { // L piece
+            if (blockIndex = 0) { return 2; }
+            if (blockIndex = 1) { return 0; }
+            if (blockIndex = 2) { return 1; }
+            return 2;
+        }
+        return 0;
+    }
+    
+    // Next piece block Y coordinate (for preview, 0 rotation basis)
+    method int getNextPieceBlockY(int pieceType, int blockIndex) {
+        if (pieceType = 0) { // I piece
+            return 0;
+        }
+        if (pieceType = 1) { // O piece
+            if ((blockIndex = 0) | (blockIndex = 1)) { return 0; }
+            return 1;
+        }
+        if (pieceType = 2) { // T piece
+            if (blockIndex = 0) { return 0; }
+            return 1;
+        }
+        if (pieceType = 3) { // S piece
+            if ((blockIndex = 0) | (blockIndex = 1)) { return 0; }
+            return 1;
+        }
+        if (pieceType = 4) { // Z piece
+            if ((blockIndex = 0) | (blockIndex = 1)) { return 0; }
+            return 1;
+        }
+        if (pieceType = 5) { // J piece
+            if (blockIndex = 0) { return 0; }
+            return 1;
+        }
+        if (pieceType = 6) { // L piece
+            if (blockIndex = 0) { return 0; }
+            return 1;
+        }
+        return 0;
+    }
+
+    // Draw game board border
+    method void drawBoardBorder() {
+        do Screen.setColor(true);
+        do Screen.drawLine(195, 8, 319, 8);     // Top
+        do Screen.drawLine(195, 252, 319, 252); // Bottom
+        do Screen.drawLine(195, 8, 195, 252);   // Left
+        do Screen.drawLine(319, 8, 319, 252);   // Right
+        return;
+    }
+    
+    // Draw single block
+    method void drawBlock(int x, int y) {
+        var int screenX, screenY;
+        
+        let screenX = boardStartX + (x * blockSize);
+        let screenY = boardStartY + (y * blockSize);
+        
+        if ((x > -1) & (x < 10) & (y > -1) & (y < 20)) {
+            do Screen.setColor(true);
+            do Screen.drawRectangle(screenX, screenY, screenX + 10, screenY + 10);
+        }
+        
+        return;
+    }
+    
+    // Draw fixed blocks on board
+    method void drawBoard(Board board) {
+        var int row, col;
+        
+        let row = 0;
+        while (row < board.getHeight()) {
+            let col = 0;
+            while (col < board.getWidth()) {
+                if (board.getBlock(col, row) = 1) {
+                    do drawBlock(col, row);
+                }
+                let col = col + 1;
+            }
+            let row = row + 1;
+        }
+        
+        return;
+    }
+    
+    // Draw tetromino piece
+    method void drawTetromino(Tetromino piece) {
+        var int i, blockX, blockY;
+        
+        if (piece = 0) {
+            return;
+        }
+        
+        let i = 0;
+        while (i < 4) {
+            let blockX = piece.getX() + piece.getBlockX(i);
+            let blockY = piece.getY() + piece.getBlockY(i);
+            do drawBlock(blockX, blockY);
+            let i = i + 1;
+        }
+        
+        return;
+    }
+    
+    // Draw ghost piece (dotted line display)
+    method void drawGhostPiece(Tetromino ghostPiece) {
+        var int i, blockX, blockY, screenX, screenY;
+        
+        if (ghostPiece = 0) {
+            return;
+        }
+        
+        do Screen.setColor(true);
+        
+        let i = 0;
+        while (i < 4) {
+            let blockX = ghostPiece.getX() + ghostPiece.getBlockX(i);
+            let blockY = ghostPiece.getY() + ghostPiece.getBlockY(i);
+            
+            if ((blockX > -1) & (blockX < 10) & (blockY > -1) & (blockY < 20)) {
+                let screenX = boardStartX + (blockX * blockSize);
+                let screenY = boardStartY + (blockY * blockSize);
+                
+                // Ghost piece is drawn with border only (hollow inside)
+                do Screen.drawLine(screenX, screenY, screenX + 10, screenY);         // Top
+                do Screen.drawLine(screenX, screenY + 10, screenX + 10, screenY + 10); // Bottom
+                do Screen.drawLine(screenX, screenY, screenX, screenY + 10);         // Left
+                do Screen.drawLine(screenX + 10, screenY, screenX + 10, screenY + 10); // Right
+            }
+            
+            let i = i + 1;
+        }
+        
+        return;
+    }
+    
+    // Basic rendering (no next piece)
+    method void render(Board board, Tetromino currentPiece, Tetromino ghostPiece, int score, int level, int lines) {
+        do clearBoard();
+        do drawUI(score, level, lines);
+        do drawNextPiece(-1); // No next piece
+        do drawBoardBorder();
+        do drawBoard(board);
+        
+        if (~(ghostPiece = 0)) {
+            do drawGhostPiece(ghostPiece);
+        }
+        
+        if (~(currentPiece = 0)) {
+            do drawTetromino(currentPiece);
+        }
+        
+        return;
+    }
+    
+    // Initial screen rendering (basic)
+    method void renderInitial(Board board, Tetromino currentPiece, Tetromino ghostPiece, int score, int level, int lines) {
+        // Clear entire screen
+        do Screen.setColor(false);
+        do Screen.drawRectangle(0, 0, 511, 255);
+        
+        let uiDrawn = false;
+        let lastScore = -1;
+        
+        do drawUI(score, level, lines);
+        do drawNextPiece(-1); // No next piece
+        do drawBoardBorder();
+        do drawBoard(board);
+        
+        if (~(ghostPiece = 0)) {
+            do drawGhostPiece(ghostPiece);
+        }
+        
+        if (~(currentPiece = 0)) {
+            do drawTetromino(currentPiece);
+        }
+        
+        return;
+    }
+    
+    // Rendering with next piece
+    method void renderWithNext(Board board, Tetromino currentPiece, Tetromino ghostPiece, int score, int level, int lines, int nextPieceType) {
+        do clearBoard();
+        do drawUI(score, level, lines);
+        do drawNextPiece(nextPieceType);
+        do drawBoardBorder();
+        do drawBoard(board);
+        
+        if (~(ghostPiece = 0)) {
+            do drawGhostPiece(ghostPiece);
+        }
+        
+        if (~(currentPiece = 0)) {
+            do drawTetromino(currentPiece);
+        }
+        
+        return;
+    }
+    
+    // Initial screen rendering (with next piece)
+    method void renderInitialWithNext(Board board, Tetromino currentPiece, Tetromino ghostPiece, int score, int level, int lines, int nextPieceType) {
+        // Clear entire screen
+        do Screen.setColor(false);
+        do Screen.drawRectangle(0, 0, 511, 255);
+        
+        let uiDrawn = false;
+        let lastScore = -1;
+        
+        do drawUI(score, level, lines);
+        do drawNextPiece(nextPieceType);
+        do drawBoardBorder();
+        do drawBoard(board);
+        
+        if (~(ghostPiece = 0)) {
+            do drawGhostPiece(ghostPiece);
+        }
+        
+        if (~(currentPiece = 0)) {
+            do drawTetromino(currentPiece);
+        }
+        
+        return;
+    }
+    
+    // Display game over message (adjusted for screen size)
+    method void drawGameOver() {
+		// GAME
+		do Output.moveCursor(5, 18);
+		do Output.printString(" _____   ___  ___  ___ _____ ");
+		do Output.moveCursor(6, 18);
+		do Output.printString("|  __ \ / _ \ |  \/  ||  ___|");
+		do Output.moveCursor(7, 18);
+		do Output.printString("| |  \// /_\ \| .  . || |__  ");
+		do Output.moveCursor(8, 18);
+		do Output.printString("| | __ |  _  || |\/| ||  __| ");
+		do Output.moveCursor(9, 18);
+		do Output.printString("| |_\ \| | | || |  | || |___ ");
+		do Output.moveCursor(10, 18);
+		do Output.printString(" \____/\_| |_/\_|  |_/\____/ ");
+		
+		// OVER
+		do Output.moveCursor(12, 18);
+		do Output.printString(" _____  _   _  _____ ______ ");
+		do Output.moveCursor(13, 18);
+		do Output.printString("|  _  || | | ||  ___|| ___ \");
+		do Output.moveCursor(14, 18);
+		do Output.printString("| | | || | | || |__  | |_/ /");
+		do Output.moveCursor(15, 18);
+		do Output.printString("| | | || | | ||  __| |    / ");
+		do Output.moveCursor(16, 18);
+		do Output.printString("\ \_/ /\ \_/ /| |___ | |\ \ ");
+		do Output.moveCursor(17, 18);
+		do Output.printString(" \___/  \___/ \____/ \_| \_|");
+		
+		// Press R to Restart
+		do Output.moveCursor(19, 21);
+		do Output.printString("Press >>R<< to Restart");
+		return;
+    }
+    
+    // Reset renderer state
+    method void reset() {
+        let uiDrawn = false;
+        let lastScore = -1;
+        return;
+    }
+    
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}

@@ -1,0 +1,1460 @@
+function Tetromino.new 0
+    push constant 4
+    call Memory.alloc 1
+    pop pointer 0
+    push argument 0
+    pop this 0
+    push argument 1
+    pop this 1
+    push argument 2
+    pop this 2
+    push constant 0
+    pop this 3
+    push pointer 0
+    return
+function Tetromino.getType 0
+    push argument 0
+    pop pointer 0
+    push this 0
+    return
+function Tetromino.getX 0
+    push argument 0
+    pop pointer 0
+    push this 1
+    return
+function Tetromino.getY 0
+    push argument 0
+    pop pointer 0
+    push this 2
+    return
+function Tetromino.getRotation 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    return
+function Tetromino.setPosition 0
+    push argument 0
+    pop pointer 0
+    push argument 1
+    pop this 1
+    push argument 2
+    pop this 2
+    push constant 0
+    return
+function Tetromino.setType 0
+    push argument 0
+    pop pointer 0
+    push argument 1
+    pop this 0
+    push constant 0
+    return
+function Tetromino.setRotation 0
+    push argument 0
+    pop pointer 0
+    push argument 1
+    pop this 3
+    push constant 0
+    return
+function Tetromino.copyFrom 0
+    push argument 0
+    pop pointer 0
+    push argument 1
+    push constant 0
+    eq
+    not
+    not
+    if-goto Tetromino_0
+    push argument 1
+    call Tetromino.getType 1
+    pop this 0
+    push argument 1
+    call Tetromino.getX 1
+    pop this 1
+    push argument 1
+    call Tetromino.getY 1
+    pop this 2
+    push argument 1
+    call Tetromino.getRotation 1
+    pop this 3
+    goto Tetromino_1
+label Tetromino_0
+label Tetromino_1
+    push constant 0
+    return
+function Tetromino.moveLeft 0
+    push argument 0
+    pop pointer 0
+    push this 1
+    push constant 1
+    sub
+    pop this 1
+    push constant 0
+    return
+function Tetromino.moveRight 0
+    push argument 0
+    pop pointer 0
+    push this 1
+    push constant 1
+    add
+    pop this 1
+    push constant 0
+    return
+function Tetromino.moveDown 0
+    push argument 0
+    pop pointer 0
+    push this 2
+    push constant 1
+    add
+    pop this 2
+    push constant 0
+    return
+function Tetromino.rotate 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    push constant 1
+    add
+    pop this 3
+    push this 3
+    push constant 3
+    gt
+    not
+    if-goto Tetromino_2
+    push constant 0
+    pop this 3
+    goto Tetromino_3
+label Tetromino_2
+label Tetromino_3
+    push constant 0
+    return
+function Tetromino.rotateReverse 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    push constant 1
+    sub
+    pop this 3
+    push this 3
+    push constant 0
+    lt
+    not
+    if-goto Tetromino_4
+    push constant 3
+    pop this 3
+    goto Tetromino_5
+label Tetromino_4
+label Tetromino_5
+    push constant 0
+    return
+function Tetromino.getIBlockX 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    push constant 0
+    eq
+    push this 3
+    push constant 2
+    eq
+    or
+    not
+    if-goto Tetromino_6
+    push argument 1
+    return
+    goto Tetromino_7
+label Tetromino_6
+    push constant 1
+    return
+label Tetromino_7
+function Tetromino.getIBlockY 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    push constant 0
+    eq
+    push this 3
+    push constant 2
+    eq
+    or
+    not
+    if-goto Tetromino_8
+    push constant 0
+    return
+    goto Tetromino_9
+label Tetromino_8
+    push argument 1
+    return
+label Tetromino_9
+function Tetromino.getOBlockX 0
+    push argument 0
+    pop pointer 0
+    push argument 1
+    push constant 0
+    eq
+    push argument 1
+    push constant 2
+    eq
+    or
+    not
+    if-goto Tetromino_10
+    push constant 0
+    return
+    goto Tetromino_11
+label Tetromino_10
+label Tetromino_11
+    push constant 1
+    return
+function Tetromino.getOBlockY 0
+    push argument 0
+    pop pointer 0
+    push argument 1
+    push constant 0
+    eq
+    push argument 1
+    push constant 1
+    eq
+    or
+    not
+    if-goto Tetromino_12
+    push constant 0
+    return
+    goto Tetromino_13
+label Tetromino_12
+label Tetromino_13
+    push constant 1
+    return
+function Tetromino.getTBlockX 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_14
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_16
+    push constant 1
+    return
+    goto Tetromino_17
+label Tetromino_16
+label Tetromino_17
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_18
+    push constant 0
+    return
+    goto Tetromino_19
+label Tetromino_18
+label Tetromino_19
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_20
+    push constant 1
+    return
+    goto Tetromino_21
+label Tetromino_20
+label Tetromino_21
+    push constant 2
+    return
+    goto Tetromino_15
+label Tetromino_14
+label Tetromino_15
+    push this 3
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_22
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_24
+    push constant 1
+    return
+    goto Tetromino_25
+label Tetromino_24
+label Tetromino_25
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_26
+    push constant 1
+    return
+    goto Tetromino_27
+label Tetromino_26
+label Tetromino_27
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_28
+    push constant 2
+    return
+    goto Tetromino_29
+label Tetromino_28
+label Tetromino_29
+    push constant 1
+    return
+    goto Tetromino_23
+label Tetromino_22
+label Tetromino_23
+    push this 3
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_30
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_32
+    push constant 0
+    return
+    goto Tetromino_33
+label Tetromino_32
+label Tetromino_33
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_34
+    push constant 1
+    return
+    goto Tetromino_35
+label Tetromino_34
+label Tetromino_35
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_36
+    push constant 2
+    return
+    goto Tetromino_37
+label Tetromino_36
+label Tetromino_37
+    push constant 1
+    return
+    goto Tetromino_31
+label Tetromino_30
+label Tetromino_31
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_38
+    push constant 1
+    return
+    goto Tetromino_39
+label Tetromino_38
+label Tetromino_39
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_40
+    push constant 0
+    return
+    goto Tetromino_41
+label Tetromino_40
+label Tetromino_41
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_42
+    push constant 1
+    return
+    goto Tetromino_43
+label Tetromino_42
+label Tetromino_43
+    push constant 1
+    return
+function Tetromino.getTBlockY 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_44
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_46
+    push constant 0
+    return
+    goto Tetromino_47
+label Tetromino_46
+label Tetromino_47
+    push constant 1
+    return
+    goto Tetromino_45
+label Tetromino_44
+label Tetromino_45
+    push this 3
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_48
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_50
+    push constant 0
+    return
+    goto Tetromino_51
+label Tetromino_50
+label Tetromino_51
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_52
+    push constant 1
+    return
+    goto Tetromino_53
+label Tetromino_52
+label Tetromino_53
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_54
+    push constant 1
+    return
+    goto Tetromino_55
+label Tetromino_54
+label Tetromino_55
+    push constant 2
+    return
+    goto Tetromino_49
+label Tetromino_48
+label Tetromino_49
+    push this 3
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_56
+    push argument 1
+    push constant 3
+    eq
+    not
+    if-goto Tetromino_58
+    push constant 2
+    return
+    goto Tetromino_59
+label Tetromino_58
+label Tetromino_59
+    push constant 1
+    return
+    goto Tetromino_57
+label Tetromino_56
+label Tetromino_57
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_60
+    push constant 0
+    return
+    goto Tetromino_61
+label Tetromino_60
+label Tetromino_61
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_62
+    push constant 1
+    return
+    goto Tetromino_63
+label Tetromino_62
+label Tetromino_63
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_64
+    push constant 1
+    return
+    goto Tetromino_65
+label Tetromino_64
+label Tetromino_65
+    push constant 2
+    return
+function Tetromino.getSBlockX 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    push constant 0
+    eq
+    push this 3
+    push constant 2
+    eq
+    or
+    not
+    if-goto Tetromino_66
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_68
+    push constant 1
+    return
+    goto Tetromino_69
+label Tetromino_68
+label Tetromino_69
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_70
+    push constant 2
+    return
+    goto Tetromino_71
+label Tetromino_70
+label Tetromino_71
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_72
+    push constant 0
+    return
+    goto Tetromino_73
+label Tetromino_72
+label Tetromino_73
+    push constant 1
+    return
+    goto Tetromino_67
+label Tetromino_66
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_74
+    push constant 0
+    return
+    goto Tetromino_75
+label Tetromino_74
+label Tetromino_75
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_76
+    push constant 0
+    return
+    goto Tetromino_77
+label Tetromino_76
+label Tetromino_77
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_78
+    push constant 1
+    return
+    goto Tetromino_79
+label Tetromino_78
+label Tetromino_79
+    push constant 1
+    return
+label Tetromino_67
+function Tetromino.getSBlockY 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    push constant 0
+    eq
+    push this 3
+    push constant 2
+    eq
+    or
+    not
+    if-goto Tetromino_80
+    push argument 1
+    push constant 0
+    eq
+    push argument 1
+    push constant 1
+    eq
+    or
+    not
+    if-goto Tetromino_82
+    push constant 0
+    return
+    goto Tetromino_83
+label Tetromino_82
+label Tetromino_83
+    push constant 1
+    return
+    goto Tetromino_81
+label Tetromino_80
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_84
+    push constant 0
+    return
+    goto Tetromino_85
+label Tetromino_84
+label Tetromino_85
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_86
+    push constant 1
+    return
+    goto Tetromino_87
+label Tetromino_86
+label Tetromino_87
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_88
+    push constant 1
+    return
+    goto Tetromino_89
+label Tetromino_88
+label Tetromino_89
+    push constant 2
+    return
+label Tetromino_81
+function Tetromino.getZBlockX 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    push constant 0
+    eq
+    push this 3
+    push constant 2
+    eq
+    or
+    not
+    if-goto Tetromino_90
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_92
+    push constant 0
+    return
+    goto Tetromino_93
+label Tetromino_92
+label Tetromino_93
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_94
+    push constant 1
+    return
+    goto Tetromino_95
+label Tetromino_94
+label Tetromino_95
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_96
+    push constant 1
+    return
+    goto Tetromino_97
+label Tetromino_96
+label Tetromino_97
+    push constant 2
+    return
+    goto Tetromino_91
+label Tetromino_90
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_98
+    push constant 1
+    return
+    goto Tetromino_99
+label Tetromino_98
+label Tetromino_99
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_100
+    push constant 0
+    return
+    goto Tetromino_101
+label Tetromino_100
+label Tetromino_101
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_102
+    push constant 1
+    return
+    goto Tetromino_103
+label Tetromino_102
+label Tetromino_103
+    push constant 0
+    return
+label Tetromino_91
+function Tetromino.getZBlockY 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    push constant 0
+    eq
+    push this 3
+    push constant 2
+    eq
+    or
+    not
+    if-goto Tetromino_104
+    push argument 1
+    push constant 0
+    eq
+    push argument 1
+    push constant 1
+    eq
+    or
+    not
+    if-goto Tetromino_106
+    push constant 0
+    return
+    goto Tetromino_107
+label Tetromino_106
+label Tetromino_107
+    push constant 1
+    return
+    goto Tetromino_105
+label Tetromino_104
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_108
+    push constant 0
+    return
+    goto Tetromino_109
+label Tetromino_108
+label Tetromino_109
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_110
+    push constant 1
+    return
+    goto Tetromino_111
+label Tetromino_110
+label Tetromino_111
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_112
+    push constant 1
+    return
+    goto Tetromino_113
+label Tetromino_112
+label Tetromino_113
+    push constant 2
+    return
+label Tetromino_105
+function Tetromino.getJBlockX 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_114
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_116
+    push constant 0
+    return
+    goto Tetromino_117
+label Tetromino_116
+label Tetromino_117
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_118
+    push constant 0
+    return
+    goto Tetromino_119
+label Tetromino_118
+label Tetromino_119
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_120
+    push constant 1
+    return
+    goto Tetromino_121
+label Tetromino_120
+label Tetromino_121
+    push constant 2
+    return
+    goto Tetromino_115
+label Tetromino_114
+label Tetromino_115
+    push this 3
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_122
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_124
+    push constant 1
+    return
+    goto Tetromino_125
+label Tetromino_124
+label Tetromino_125
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_126
+    push constant 2
+    return
+    goto Tetromino_127
+label Tetromino_126
+label Tetromino_127
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_128
+    push constant 1
+    return
+    goto Tetromino_129
+label Tetromino_128
+label Tetromino_129
+    push constant 1
+    return
+    goto Tetromino_123
+label Tetromino_122
+label Tetromino_123
+    push this 3
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_130
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_132
+    push constant 0
+    return
+    goto Tetromino_133
+label Tetromino_132
+label Tetromino_133
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_134
+    push constant 1
+    return
+    goto Tetromino_135
+label Tetromino_134
+label Tetromino_135
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_136
+    push constant 2
+    return
+    goto Tetromino_137
+label Tetromino_136
+label Tetromino_137
+    push constant 2
+    return
+    goto Tetromino_131
+label Tetromino_130
+label Tetromino_131
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_138
+    push constant 1
+    return
+    goto Tetromino_139
+label Tetromino_138
+label Tetromino_139
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_140
+    push constant 1
+    return
+    goto Tetromino_141
+label Tetromino_140
+label Tetromino_141
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_142
+    push constant 1
+    return
+    goto Tetromino_143
+label Tetromino_142
+label Tetromino_143
+    push constant 0
+    return
+function Tetromino.getJBlockY 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_144
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_146
+    push constant 0
+    return
+    goto Tetromino_147
+label Tetromino_146
+label Tetromino_147
+    push constant 1
+    return
+    goto Tetromino_145
+label Tetromino_144
+label Tetromino_145
+    push this 3
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_148
+    push argument 1
+    push constant 0
+    eq
+    push argument 1
+    push constant 1
+    eq
+    or
+    not
+    if-goto Tetromino_150
+    push constant 0
+    return
+    goto Tetromino_151
+label Tetromino_150
+label Tetromino_151
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_152
+    push constant 1
+    return
+    goto Tetromino_153
+label Tetromino_152
+label Tetromino_153
+    push constant 2
+    return
+    goto Tetromino_149
+label Tetromino_148
+label Tetromino_149
+    push this 3
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_154
+    push argument 1
+    push constant 3
+    eq
+    not
+    if-goto Tetromino_156
+    push constant 1
+    return
+    goto Tetromino_157
+label Tetromino_156
+label Tetromino_157
+    push constant 0
+    return
+    goto Tetromino_155
+label Tetromino_154
+label Tetromino_155
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_158
+    push constant 0
+    return
+    goto Tetromino_159
+label Tetromino_158
+label Tetromino_159
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_160
+    push constant 1
+    return
+    goto Tetromino_161
+label Tetromino_160
+label Tetromino_161
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_162
+    push constant 2
+    return
+    goto Tetromino_163
+label Tetromino_162
+label Tetromino_163
+    push constant 2
+    return
+function Tetromino.getLBlockX 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_164
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_166
+    push constant 2
+    return
+    goto Tetromino_167
+label Tetromino_166
+label Tetromino_167
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_168
+    push constant 0
+    return
+    goto Tetromino_169
+label Tetromino_168
+label Tetromino_169
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_170
+    push constant 1
+    return
+    goto Tetromino_171
+label Tetromino_170
+label Tetromino_171
+    push constant 2
+    return
+    goto Tetromino_165
+label Tetromino_164
+label Tetromino_165
+    push this 3
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_172
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_174
+    push constant 0
+    return
+    goto Tetromino_175
+label Tetromino_174
+label Tetromino_175
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_176
+    push constant 0
+    return
+    goto Tetromino_177
+label Tetromino_176
+label Tetromino_177
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_178
+    push constant 0
+    return
+    goto Tetromino_179
+label Tetromino_178
+label Tetromino_179
+    push constant 1
+    return
+    goto Tetromino_173
+label Tetromino_172
+label Tetromino_173
+    push this 3
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_180
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_182
+    push constant 0
+    return
+    goto Tetromino_183
+label Tetromino_182
+label Tetromino_183
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_184
+    push constant 1
+    return
+    goto Tetromino_185
+label Tetromino_184
+label Tetromino_185
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_186
+    push constant 2
+    return
+    goto Tetromino_187
+label Tetromino_186
+label Tetromino_187
+    push constant 0
+    return
+    goto Tetromino_181
+label Tetromino_180
+label Tetromino_181
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_188
+    push constant 1
+    return
+    goto Tetromino_189
+label Tetromino_188
+label Tetromino_189
+    push argument 1
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_190
+    push constant 2
+    return
+    goto Tetromino_191
+label Tetromino_190
+label Tetromino_191
+    push argument 1
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_192
+    push constant 2
+    return
+    goto Tetromino_193
+label Tetromino_192
+label Tetromino_193
+    push constant 2
+    return
+function Tetromino.getLBlockY 0
+    push argument 0
+    pop pointer 0
+    push this 3
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_194
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_196
+    push constant 0
+    return
+    goto Tetromino_197
+label Tetromino_196
+label Tetromino_197
+    push constant 1
+    return
+    goto Tetromino_195
+label Tetromino_194
+label Tetromino_195
+    push this 3
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_198
+    push argument 1
+    push constant 3
+    eq
+    not
+    if-goto Tetromino_200
+    push constant 2
+    return
+    goto Tetromino_201
+label Tetromino_200
+label Tetromino_201
+    push argument 1
+    return
+    goto Tetromino_199
+label Tetromino_198
+label Tetromino_199
+    push this 3
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_202
+    push argument 1
+    push constant 3
+    eq
+    not
+    if-goto Tetromino_204
+    push constant 1
+    return
+    goto Tetromino_205
+label Tetromino_204
+label Tetromino_205
+    push constant 0
+    return
+    goto Tetromino_203
+label Tetromino_202
+label Tetromino_203
+    push argument 1
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_206
+    push constant 0
+    return
+    goto Tetromino_207
+label Tetromino_206
+label Tetromino_207
+    push argument 1
+    push constant 1
+    sub
+    return
+function Tetromino.getBlockX 0
+    push argument 0
+    pop pointer 0
+    push this 0
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_208
+    push pointer 0
+    push argument 1
+    call Tetromino.getIBlockX 2
+    return
+    goto Tetromino_209
+label Tetromino_208
+label Tetromino_209
+    push this 0
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_210
+    push pointer 0
+    push argument 1
+    call Tetromino.getOBlockX 2
+    return
+    goto Tetromino_211
+label Tetromino_210
+label Tetromino_211
+    push this 0
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_212
+    push pointer 0
+    push argument 1
+    call Tetromino.getTBlockX 2
+    return
+    goto Tetromino_213
+label Tetromino_212
+label Tetromino_213
+    push this 0
+    push constant 3
+    eq
+    not
+    if-goto Tetromino_214
+    push pointer 0
+    push argument 1
+    call Tetromino.getSBlockX 2
+    return
+    goto Tetromino_215
+label Tetromino_214
+label Tetromino_215
+    push this 0
+    push constant 4
+    eq
+    not
+    if-goto Tetromino_216
+    push pointer 0
+    push argument 1
+    call Tetromino.getZBlockX 2
+    return
+    goto Tetromino_217
+label Tetromino_216
+label Tetromino_217
+    push this 0
+    push constant 5
+    eq
+    not
+    if-goto Tetromino_218
+    push pointer 0
+    push argument 1
+    call Tetromino.getJBlockX 2
+    return
+    goto Tetromino_219
+label Tetromino_218
+label Tetromino_219
+    push this 0
+    push constant 6
+    eq
+    not
+    if-goto Tetromino_220
+    push pointer 0
+    push argument 1
+    call Tetromino.getLBlockX 2
+    return
+    goto Tetromino_221
+label Tetromino_220
+label Tetromino_221
+    push constant 0
+    return
+function Tetromino.getBlockY 0
+    push argument 0
+    pop pointer 0
+    push this 0
+    push constant 0
+    eq
+    not
+    if-goto Tetromino_222
+    push pointer 0
+    push argument 1
+    call Tetromino.getIBlockY 2
+    return
+    goto Tetromino_223
+label Tetromino_222
+label Tetromino_223
+    push this 0
+    push constant 1
+    eq
+    not
+    if-goto Tetromino_224
+    push pointer 0
+    push argument 1
+    call Tetromino.getOBlockY 2
+    return
+    goto Tetromino_225
+label Tetromino_224
+label Tetromino_225
+    push this 0
+    push constant 2
+    eq
+    not
+    if-goto Tetromino_226
+    push pointer 0
+    push argument 1
+    call Tetromino.getTBlockY 2
+    return
+    goto Tetromino_227
+label Tetromino_226
+label Tetromino_227
+    push this 0
+    push constant 3
+    eq
+    not
+    if-goto Tetromino_228
+    push pointer 0
+    push argument 1
+    call Tetromino.getSBlockY 2
+    return
+    goto Tetromino_229
+label Tetromino_228
+label Tetromino_229
+    push this 0
+    push constant 4
+    eq
+    not
+    if-goto Tetromino_230
+    push pointer 0
+    push argument 1
+    call Tetromino.getZBlockY 2
+    return
+    goto Tetromino_231
+label Tetromino_230
+label Tetromino_231
+    push this 0
+    push constant 5
+    eq
+    not
+    if-goto Tetromino_232
+    push pointer 0
+    push argument 1
+    call Tetromino.getJBlockY 2
+    return
+    goto Tetromino_233
+label Tetromino_232
+label Tetromino_233
+    push this 0
+    push constant 6
+    eq
+    not
+    if-goto Tetromino_234
+    push pointer 0
+    push argument 1
+    call Tetromino.getLBlockY 2
+    return
+    goto Tetromino_235
+label Tetromino_234
+label Tetromino_235
+    push constant 0
+    return
+function Tetromino.dispose 0
+    push argument 0
+    pop pointer 0
+    push pointer 0
+    call Memory.deAlloc 1
+    pop temp 0
+    push constant 0
+    return

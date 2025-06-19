@@ -1,0 +1,185 @@
+class InputHandler {
+    field int repeatDelay;
+    field boolean leftPressed;
+    field boolean rightPressed;
+    field boolean downPressed;
+    field boolean upPressed;
+    field boolean spacePressed;
+    field boolean restartPressed;
+    field int leftHoldTime;
+    field int rightHoldTime;
+    field int downHoldTime;
+    
+    constructor InputHandler new() {
+        let repeatDelay = 4;  // Faster repeat start (was 8 -> 4)
+        let leftPressed = false;
+        let rightPressed = false;
+        let downPressed = false;
+        let upPressed = false;
+        let spacePressed = false;
+        let restartPressed = false;
+        let leftHoldTime = 0;
+        let rightHoldTime = 0;
+        let downHoldTime = 0;
+        return this;
+    }
+    
+    
+    // Check left key press (faster repeat)
+    method boolean isLeftPressed() {
+        var int currentKey;
+        let currentKey = Keyboard.keyPressed();
+        
+        if (currentKey = 130) { // Left arrow
+            if (~leftPressed) {
+                let leftPressed = true;
+                let leftHoldTime = 0;
+                return true; // When first pressed
+            } else {
+                let leftHoldTime = leftHoldTime + 1;
+                if (leftHoldTime > repeatDelay) {
+                    // Faster repeat (every frame)
+                    return true;
+                }
+            }
+        } else {
+            let leftPressed = false;
+            let leftHoldTime = 0;
+        }
+        
+        return false;
+    }
+    
+    // Check right key press (faster repeat)
+    method boolean isRightPressed() {
+        var int currentKey;
+        let currentKey = Keyboard.keyPressed();
+        
+        if (currentKey = 132) { // Right arrow
+            if (~rightPressed) {
+                let rightPressed = true;
+                let rightHoldTime = 0;
+                return true;
+            } else {
+                let rightHoldTime = rightHoldTime + 1;
+                if (rightHoldTime > repeatDelay) {
+                    // Faster repeat
+                    return true;
+                }
+            }
+        } else {
+            let rightPressed = false;
+            let rightHoldTime = 0;
+        }
+        
+        return false;
+    }
+    
+    // Check down key press (very fast soft drop)
+    method boolean isDownPressed() {
+        var int currentKey;
+        let currentKey = Keyboard.keyPressed();
+        
+        if (currentKey = 133) { // Down arrow
+            if (~downPressed) {
+                let downPressed = true;
+                let downHoldTime = 0;
+                return true;
+            } else {
+                let downHoldTime = downHoldTime + 1;
+                if (downHoldTime > 1) { // Very fast repeat (was 2 -> 1)
+                    return true; // Every frame
+                }
+            }
+        } else {
+            let downPressed = false;
+            let downHoldTime = 0;
+        }
+        
+        return false;
+    }
+    
+    // Check up key press (rotation, no repeat)
+    method boolean isUpPressed() {
+        var int currentKey;
+        let currentKey = Keyboard.keyPressed();
+        
+        if (currentKey = 131) { // Up arrow
+            if (~upPressed) {
+                let upPressed = true;
+                return true; // Only when first pressed
+            }
+        } else {
+            let upPressed = false;
+        }
+        
+        return false;
+    }
+    
+    // Check space key press (hard drop, no repeat)
+    method boolean isSpacePressed() {
+        var int currentKey;
+        let currentKey = Keyboard.keyPressed();
+        
+        if (currentKey = 32) { // Space
+            if (~spacePressed) {
+                let spacePressed = true;
+                return true;
+            }
+        } else {
+            let spacePressed = false;
+        }
+        
+        return false;
+    }
+    
+    // Check R key press (restart, no repeat)
+    method boolean isRestartPressed() {
+        var int currentKey;
+        let currentKey = Keyboard.keyPressed();
+        
+        if ((currentKey = 82) | (currentKey = 114)) { // R or r
+            if (~restartPressed) {
+                let restartPressed = true;
+                return true;
+            }
+        } else {
+            let restartPressed = false;
+        }
+        
+        return false;
+    }
+    
+    // Check Q key press (quit)
+    method boolean isQuitPressed() {
+        var int currentKey;
+        let currentKey = Keyboard.keyPressed();
+        
+        return (currentKey = 81) | (currentKey = 113); // Q or q
+    }
+    
+    // Set repeat speed (faster default values)
+    method void setRepeatRate(int delay) {
+        let repeatDelay = delay;
+        return;
+    }
+    
+    // Reset all key states
+    method void reset() {
+        let leftPressed = false;
+        let rightPressed = false;
+        let downPressed = false;
+        let upPressed = false;
+        let spacePressed = false;
+        let restartPressed = false;
+        let leftHoldTime = 0;
+        let rightHoldTime = 0;
+        let downHoldTime = 0;
+        return;
+    }
+    
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}
