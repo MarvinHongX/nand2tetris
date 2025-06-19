@@ -1,0 +1,100 @@
+/**
+ * This library provides two services: direct access to the computer's main
+ * memory (RAM), and allocation and de-allocation of memory blocks. The Hack RAM
+ * consists of 32,768 words, each holding a 16-bit binary number.
+ */ 
+class Memory {
+    static Array ram;
+    static int freeList;
+    static int heapBase;
+    static int heapLength;
+
+    /** Initializes the class. */
+    function void init() {
+        let ram = 0;
+        let heapBase = 2048;
+        let heapLength = 14335; // 16383 - 2048
+        let freeList = heapBase;
+        
+        // Initialize the free list with a single block
+        let ram[freeList] = 0; // next pointer
+        let ram[freeList + 1] = heapLength; // length
+        
+        return;
+    }
+
+    /** Returns the RAM value at the given address. */
+    function int peek(int address) {
+        return ram[address];
+    }
+
+    /** Sets the RAM value at the given address to the given value. */
+    function void poke(int address, int value) {
+        let ram[address] = value;
+        return;
+    }
+
+    /** Finds an available RAM block of the given size and returns
+     *  a reference to its base address. */
+    function int alloc(int size) {
+        var int current, prev, bestFit, bestFitPrev, bestFitSize;
+        var int block;
+        
+        let current = freeList;
+        let prev = 0;
+        let bestFit = 0;
+        let bestFitPrev = 0;
+        let bestFitSize = 32767; // Max int value
+        
+        // Find the best fit block
+        while (~(current = 0)) {
+            if ((ram[current + 1] > (size + 1)) & (ram[current + 1] < bestFitSize)) {
+                let bestFit = current;
+                let bestFitPrev = prev;
+                let bestFitSize = ram[current + 1];
+            }
+            let prev = current;
+            let current = ram[current];
+        }
+        
+        if (bestFit = 0) {
+            // No suitable block found
+            do Sys.error(6); // Heap overflow
+            return 0;
+        }
+        
+        // Allocate the block
+        if (bestFitSize > (size + 2)) {
+            // Split the block
+            let block = bestFit + bestFitSize - size;
+            let ram[bestFit + 1] = bestFitSize - size - 1;
+            let ram[block - 1] = size + 1;
+        } else {
+            // Use the entire block
+            let block = bestFit + 1;
+            if (bestFitPrev = 0) {
+                let freeList = ram[bestFit];
+            } else {
+                let ram[bestFitPrev] = ram[bestFit];
+            }
+        }
+        
+        return block;
+    }
+
+    /** De-allocates the given object (cast as an array) by making
+     *  it available for future allocations. */
+    function void deAlloc(Array o) {
+        var int segment, size;
+        
+        let segment = o - 1;
+        let size = ram[segment];
+        
+        // Add the segment to the beginning of the free list
+        let ram[segment - 1] = freeList;
+        let ram[segment] = size;
+        let freeList = segment - 1;
+        
+        return;
+    }
+}
