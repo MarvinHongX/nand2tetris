@@ -1,0 +1,163 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Math.jack
+/**
+ *  A library of commonly used mathematical functions.
+ *  All functions runs in O(n), where n is the number of bits used
+ *  for representing a two's complement integer value (16 in the Hack computer). 
+ *  Note: Jack compilers implement multiplication and division
+ *  using calls to OS functions in this class.
+ */
+class Math {
+    static Array powersOfTwo; // Stores 2^0, 2^1, 2^2,..., 2^(n-1)
+    static Array divArray;    // Helper array for division
+
+    // Initializes the Math library.
+    function void init() {
+        var int i;
+        let powersOfTwo = Array.new(16);
+        let powersOfTwo[0] = 1;
+        let i = 0;
+        while (i < 15) {
+            let i = i + 1;
+            let powersOfTwo[i] = powersOfTwo[i-1] + powersOfTwo[i-1];
+        }
+        return;
+    }
+
+    /** Returns the absolute value of x. */
+    function int abs(int x) {
+        if (x < 0) {
+            let x = -x;
+        }
+        return x;
+    }
+
+    /** Returns the product of x and y. 
+     *  When a Jack compiler detects the multiplication operator '*'
+     *  in an expression, it handles it by invoking this method. 
+     *  Thus, in Jack, x * y and Math.multiply(x,y) return the same value. */
+    function int multiply(int x, int y) {
+        var int sum, shiftedX, i;
+        var boolean isNegative;
+        
+        let isNegative = ((x < 0) & (y > 0)) | ((x > 0) & (y < 0));
+        let x = Math.abs(x);
+        let y = Math.abs(y);
+        
+        // Ensure x is the larger number for optimization
+        if (x < y) {
+            let shiftedX = x;
+            let x = y;
+            let y = shiftedX;
+        }
+        
+        let sum = 0;
+        let i = 0;
+        
+        while ((i < 16) & (y > 0)) {
+            if ((powersOfTwo[i] & y) > 0) {
+                let sum = sum + x;
+            }
+            let x = x + x;
+            let i = i + 1;
+        }
+        
+        if (isNegative) {
+            let sum = -sum;
+        }
+        
+        return sum;
+    }
+
+    /** Returns the integer part of x / y.
+     *  When a Jack compiler detects the division operator '/'
+     *  an an expression, it handles it by invoking this method.
+     *  Thus, x/y and Math.divide(x,y) return the same value. */
+    function int divide(int x, int y) {
+        var int result, i;
+        var boolean isNegative, overflow;
+        
+        if (y = 0) {
+            do Sys.error(3);  // Division by zero error
+        }
+        
+        let isNegative = ((x < 0) & (y > 0)) | ((x > 0) & (y < 0));
+        let divArray = Array.new(16);
+        let divArray[0] = Math.abs(y);
+        let x = Math.abs(x);
+        
+        let i = 0;
+        let overflow = false;
+        
+        // Build powers of divisor
+        while ((i < 15) & (~overflow)) {
+            let overflow = (32767 - divArray[i]) < (divArray[i] - 1);
+            if (~overflow) {
+                let divArray[i+1] = divArray[i] + divArray[i];
+                let overflow = (divArray[i+1] - 1) > (x - 1);
+                if (~overflow) {
+                    let i = i + 1;
+                }
+            }
+        }
+        
+        let result = 0;
+        
+        // Subtract largest possible multiples
+        while (i > -1) {
+            if ((divArray[i] - 1) < x) {
+                let result = result + powersOfTwo[i];
+                let x = x - divArray[i];
+            }
+            let i = i - 1;
+        }
+        
+        if (isNegative) {
+            let result = -result;
+        }
+        
+        return result;
+    }
+
+    /** Returns the integer part of the square root of x. */
+    function int sqrt(int x) {
+        var int result, temp, tempSquared, i;
+        
+        if (x < 0) {
+            do Sys.error(4);  // Square root of negative number
+        }
+        
+        let result = 0;
+        let i = 7;  // Start from bit 7 (middle of 16-bit range)
+        
+        while (i > -1) {
+            let temp = result + powersOfTwo[i];
+            let tempSquared = temp * temp;
+            
+            if ((tempSquared > 0) & (~(tempSquared > x))) {
+                let result = temp;
+            }
+            let i = i - 1;
+        }
+        
+        return result;
+    }
+
+    /** Returns the greater value. */
+    function int max(int a, int b) {
+        if (a > b) {
+            let b = a;
+        }
+        return b;
+    }
+
+    /** Returns the smaller value. */
+    function int min(int a, int b) {
+        if (a < b) {
+            let b = a;
+        }
+        return b;
+    }
+}

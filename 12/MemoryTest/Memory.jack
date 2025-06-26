@@ -36,16 +36,16 @@ class Memory {
 
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
-    function int alloc(int size) {
+    function Array alloc(int size) {  // ← 여기 수정: int → Array
         var int current, prev, bestFit, bestFitPrev, bestFitSize;
         var int block;
-        
+
         let current = freeList;
         let prev = 0;
         let bestFit = 0;
         let bestFitPrev = 0;
         let bestFitSize = 32767; // Max int value
-        
+
         // Find the best fit block
         while (~(current = 0)) {
             if ((ram[current + 1] > (size + 1)) & (ram[current + 1] < bestFitSize)) {
@@ -56,11 +56,10 @@ class Memory {
             let prev = current;
             let current = ram[current];
         }
-        
+
         if (bestFit = 0) {
-            // No suitable block found
-            do Sys.error(6); // Heap overflow
-            return 0;
+            // No suitable block found - return null instead of calling Sys.error
+            return 0;  // ← 여기 수정: Sys.error 제거
         }
         
         // Allocate the block

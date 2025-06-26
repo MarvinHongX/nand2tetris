@@ -1,0 +1,299 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+/**
+ * A library of functions for displaying graphics on the screen.
+ * The Hack physical screen consists of 512 rows (indexed 0..511, top to bottom)
+ * of 256 pixels each (indexed 0..255, left to right). The top left pixel on 
+ * the screen is indexed (0,0).
+ */
+class Screen {
+    static boolean color;
+    static Array twoToThe;
+    static Array notTwoToThe;
+    static Array leftMasks;   // Pre-computed left edge masks
+    static Array rightMasks;  // Pre-computed right edge masks
+
+    /** Initializes the Screen. */
+    function void init() {
+        var int i, value, mask;
+        
+        let color = true;
+        let twoToThe = Array.new(16);
+        let notTwoToThe = Array.new(16);
+        let leftMasks = Array.new(16);
+        let rightMasks = Array.new(16);
+        
+        let value = 1;
+        let i = 0;
+        while (i < 16) {
+            let twoToThe[i] = value;
+            let notTwoToThe[i] = ~value;
+            let value = value + value;
+            let i = i + 1;
+        }
+        
+        // Pre-compute left edge masks (bits from i to 15)
+        let i = 0;
+        while (i < 16) {
+            let mask = 0;
+            let value = i;
+            while (value < 16) {
+                let mask = mask | twoToThe[value];
+                let value = value + 1;
+            }
+            let leftMasks[i] = mask;
+            let i = i + 1;
+        }
+        
+        // Pre-compute right edge masks (bits from 0 to i)
+        let i = 0;
+        while (i < 16) {
+            let mask = 0;
+            let value = 0;
+            while (value < (i + 1)) {
+                let mask = mask | twoToThe[value];
+                let value = value + 1;
+            }
+            let rightMasks[i] = mask;
+            let i = i + 1;
+        }
+        
+        return;
+    }
+
+    /** Erases the entire screen. */
+    function void clearScreen() {
+        var int addr;
+        let addr = 16384;
+        
+        // Unroll loop for 2x speed
+        while (addr < 24574) {  // Leave room for 2 operations
+            do Memory.poke(addr, 0);
+            do Memory.poke(addr + 1, 0);
+            let addr = addr + 2;
+        }
+        
+        // Handle remaining addresses
+        while (addr < 24576) {
+            do Memory.poke(addr, 0);
+            let addr = addr + 1;
+        }
+        return;
+    }
+
+    /** Sets the current color, to be used for all subsequent drawXXX commands.
+     *  Black is represented by true, white by false. */
+    function void setColor(boolean b) {
+        let color = b;
+        return;
+    }
+
+    /** Draws the (x,y) pixel, using the current color. */
+    function void drawPixel(int x, int y) {
+        var int addr, bit, pixels;
+        
+        let addr = 16384 + (y * 32) + (x / 16);
+        let bit = x & 15;
+        let pixels = Memory.peek(addr);
+        
+        if (color) {
+            do Memory.poke(addr, pixels | twoToThe[bit]);
+        } else {
+            do Memory.poke(addr, pixels & notTwoToThe[bit]);
+        }
+        return;
+    }
+
+    /** Optimized horizontal line with pre-computed masks */
+    function void drawHorizontalLine(int x1, int x2, int y) {
+        var int addr1, addr2, bit1, bit2, temp, pixels;
+        var int baseAddr;
+        
+        if (x1 > x2) {
+            let temp = x1;
+            let x1 = x2;
+            let x2 = temp;
+        }
+        
+        let baseAddr = 16384 + (y * 32);
+        let addr1 = baseAddr + (x1 / 16);
+        let addr2 = baseAddr + (x2 / 16);
+        let bit1 = x1 & 15;
+        let bit2 = x2 & 15;
+        
+        if (addr1 = addr2) {
+            // Same word - use pre-computed masks for efficiency
+            let temp = leftMasks[bit1] & rightMasks[bit2];
+            let pixels = Memory.peek(addr1);
+            
+            if (color) {
+                do Memory.poke(addr1, pixels | temp);
+            } else {
+                do Memory.poke(addr1, pixels & (~temp));
+            }
+        } else {
+            // Multiple words
+            // First word - use pre-computed left mask
+            let pixels = Memory.peek(addr1);
+            if (color) {
+                do Memory.poke(addr1, pixels | leftMasks[bit1]);
+            } else {
+                do Memory.poke(addr1, pixels & (~leftMasks[bit1]));
+            }
+            
+            // Middle words - unroll for speed when possible
+            let temp = addr1 + 1;
+            while (temp < (addr2 - 1)) {  // Process pairs
+                if (color) {
+                    do Memory.poke(temp, -1);
+                    do Memory.poke(temp + 1, -1);
+                } else {
+                    do Memory.poke(temp, 0);
+                    do Memory.poke(temp + 1, 0);
+                }
+                let temp = temp + 2;
+            }
+            
+            // Handle remaining middle words
+            while (temp < addr2) {
+                if (color) {
+                    do Memory.poke(temp, -1);
+                } else {
+                    do Memory.poke(temp, 0);
+                }
+                let temp = temp + 1;
+            }
+            
+            // Last word - use pre-computed right mask
+            let pixels = Memory.peek(addr2);
+            if (color) {
+                do Memory.poke(addr2, pixels | rightMasks[bit2]);
+            } else {
+                do Memory.poke(addr2, pixels & (~rightMasks[bit2]));
+            }
+        }
+        return;
+    }
+
+    /** Optimized vertical line */
+    function void drawVerticalLine(int x, int y1, int y2) {
+        var int addr, bit, mask, notMask, temp;
+        
+        if (y1 > y2) {
+            let temp = y1;
+            let y1 = y2;
+            let y2 = temp;
+        }
+        
+        let bit = x & 15;
+        let mask = twoToThe[bit];
+        let notMask = notTwoToThe[bit];
+        
+        while (y1 < (y2 + 1)) {
+            let addr = 16384 + (y1 * 32) + (x / 16);
+            let temp = Memory.peek(addr);
+            
+            if (color) {
+                do Memory.poke(addr, temp | mask);
+            } else {
+                do Memory.poke(addr, temp & notMask);
+            }
+            let y1 = y1 + 1;
+        }
+        return;
+    }
+
+    /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+        var int dx, dy, a, b, diff, temp;
+
+        // Horizontal line optimization
+        if (y1 = y2) {
+            do Screen.drawHorizontalLine(x1, x2, y1);
+            return;
+        }
+        
+        // Vertical line optimization
+        if (x1 = x2) {
+            do Screen.drawVerticalLine(x1, y1, y2);
+            return;
+        }
+        
+        // Diagonal line - use Bresenham's algorithm
+        if (x1 > x2) {
+            let temp = x1; let x1 = x2; let x2 = temp;
+            let temp = y1; let y1 = y2; let y2 = temp;
+        }
+        
+        let dx = x2 - x1;
+        let dy = Math.abs(y2 - y1);
+        let a = 0;
+        let b = 0;
+        let diff = 0;
+        
+        if (y2 > y1) {
+            while ((a < (dx + 1)) & (b < (dy + 1))) {
+                do Screen.drawPixel(x1 + a, y1 + b);
+                if (diff < 0) {
+                    let a = a + 1;
+                    let diff = diff + dy;
+                } else {
+                    let b = b + 1;
+                    let diff = diff - dx;
+                }
+            }
+        } else {
+            while ((a < (dx + 1)) & (b < (dy + 1))) {
+                do Screen.drawPixel(x1 + a, y1 - b);
+                if (diff < 0) {
+                    let a = a + 1;
+                    let diff = diff + dy;
+                } else {
+                    let b = b + 1;
+                    let diff = diff - dx;
+                }
+            }
+        }
+        return;
+    }
+
+    /** Draws a filled rectangle whose top left corner is (x1, y1)
+     *  and bottom right corner is (x2,y2), using the current color. */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+        if ((x1 > x2) | (y1 > y2)) { 
+            return; 
+        }
+
+        while (y1 < (y2 + 1)) {
+            do Screen.drawHorizontalLine(x1, x2, y1);
+            let y1 = y1 + 1;
+        }
+        return;
+    }
+
+    /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
+    function void drawCircle(int xCenter, int yCenter, int radius) {
+        var int dy, width, radiusSquared;
+        
+        let radiusSquared = radius * radius;
+        let dy = 0;
+        
+        // Use symmetry - only calculate half and mirror
+        while (dy < (radius + 1)) {
+            let width = Math.sqrt(radiusSquared - (dy * dy));
+            
+            if (dy = 0) {
+                // Center line - draw once
+                do Screen.drawHorizontalLine(xCenter - width, xCenter + width, yCenter);
+            } else {
+                // Mirror above and below
+                do Screen.drawHorizontalLine(xCenter - width, xCenter + width, yCenter + dy);
+                do Screen.drawHorizontalLine(xCenter - width, xCenter + width, yCenter - dy);
+            }
+            
+            let dy = dy + 1;
+        }
+        return;
+    }
+}

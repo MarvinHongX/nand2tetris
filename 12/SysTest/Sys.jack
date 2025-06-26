@@ -1,0 +1,53 @@
+/**
+ * A library that supports various program execution services.
+ */
+class Sys {
+
+    /** Performs all the initializations required by the OS. */
+    function void init() {
+        do Memory.init();
+        do Math.init();
+        do Screen.init();
+        do Output.init();
+        do Keyboard.init();
+        do Main.main();  // Call the main program
+        do Sys.halt();   // Halt after main program ends
+        return;
+    }
+
+    /** Halts the program execution. */
+    function void halt() {
+        while (true) {
+            // Infinite loop to halt execution
+        }
+        return;
+    }
+
+    /** Waits approximately duration milliseconds and returns.  */
+    function void wait(int duration) {
+        var int i, j;
+        
+        if (duration < 0) {
+            return;
+        }
+        
+        let i = 0;
+        while (i < duration) {
+            let j = 0;
+            while (j < 150) {  // Reduced from 318 for faster response
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+        return;
+    }
+
+    /** Displays the given error code in the form "ERR<errorCode>",
+     *  and halts the program's execution. */
+    function void error(int errorCode) {
+        do Output.printString("ERR");
+        do Output.printInt(errorCode);
+        do Sys.halt();
+        return;
+    }
+}
