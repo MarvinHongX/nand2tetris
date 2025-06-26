@@ -17,6 +17,7 @@ It translates `.jack` files—written in the Jack programming language—into `.
 │   ├── Average/                    // Simple average calculation program
 │   ├── ComplexArrays/              // Array manipulation and processing
 │   ├── ConvertToBin/               // Binary conversion utility
+│   ├── Fill/                       // Blackens the screen
 │   ├── Pong/                       // Classic Pong game implementation
 │   ├── Seven/                      // Basic arithmetic operations
 │   ├── Square/                     // Square drawing and manipulation
