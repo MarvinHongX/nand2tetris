@@ -2,39 +2,19 @@ package assembler;
 
 /**
  * The Code class contains methods to translate assembly code to binary machine code.
+ * Each method returns the binary code for a specific field of the machine language instruction.
  */
 public class Code {
 
     /**
-     * Converts the A-instruction (symbol or value) to its 16-bit binary representation.
+     * Returns the binary code of the dest mnemonic (3 bits).
      */
-    public String toBinaryA(int address) {
-        String binary = "0" + String.format("%15s", Integer.toBinaryString(address)).replace(' ', '0');
-//        System.out.println("address, binary = " + address + "," + binary);
-        System.out.println(binary); // Output the binary instruction
-        return binary;
-    }
+    public String dest(String mnemonic) {
+        if (mnemonic == null || mnemonic.isEmpty()) {
+            return "000";
+        }
 
-    /**
-     * Converts the C-instruction (destination, computation, and jump) to its 16-bit binary representation.
-     */
-    public String toBinaryC(String dest, String comp, String jump) {
-        String binaryDest = destToBinary(dest);
-        String binaryComp = compToBinary(comp);
-        String binaryJump = jumpToBinary(jump);
-
-        String binary = "111" + binaryComp + binaryDest + binaryJump;
-//        System.out.println("dest, binaryDest = " + dest + "," + binaryDest);
-//        System.out.println("comp, binaryComp = " + comp + "," + binaryComp);
-//        System.out.println("jump, binaryJump = " + jump + "," + binaryJump);
-        System.out.println(binary); // Output the binary instruction
-        return binary;
-    }
-
-    private String destToBinary(String dest) {
-        if (dest == null || dest.isEmpty()) return "000";
-
-        return switch (dest) {
+        return switch (mnemonic) {
             case "M" -> "001";
             case "D" -> "010";
             case "MD" -> "011";
@@ -46,8 +26,15 @@ public class Code {
         };
     }
 
-    private String compToBinary(String comp) {
-        return switch (comp) {
+    /**
+     * Returns the binary code of the comp mnemonic (7 bits).
+     */
+    public String comp(String mnemonic) {
+        if (mnemonic == null) {
+            return "0000000";
+        }
+
+        return switch (mnemonic) {
             case "0" -> "0101010";
             case "1" -> "0111111";
             case "-1" -> "0111010";
@@ -76,14 +63,19 @@ public class Code {
             case "M-D" -> "1000111";
             case "D&M" -> "1000000";
             case "D|M" -> "1010101";
-            default -> "0000000"; // Should not happen
+            default -> "0000000";
         };
     }
 
-    private String jumpToBinary(String jump) {
-        if (jump == null || jump.isEmpty()) return "000";
+    /**
+     * Returns the binary code of the jump mnemonic (3 bits).
+     */
+    public String jump(String mnemonic) {
+        if (mnemonic == null || mnemonic.isEmpty()) {
+            return "000";
+        }
 
-        return switch (jump) {
+        return switch (mnemonic) {
             case "JGT" -> "001";
             case "JEQ" -> "010";
             case "JGE" -> "011";
@@ -93,5 +85,19 @@ public class Code {
             case "JMP" -> "111";
             default -> "000";
         };
+    }
+
+    /**
+     * Utility method to convert an integer address to 16-bit binary string for A-instructions.
+     */
+    public String toBinaryA(int address) {
+        return "0" + String.format("%15s", Integer.toBinaryString(address)).replace(' ', '0');
+    }
+
+    /**
+     * Utility method to convert C-instruction components to 16-bit binary string.
+     */
+    public String toBinaryC(String dest, String comp, String jump) {
+        return "111" + comp(comp) + dest(dest) + jump(jump);
     }
 }

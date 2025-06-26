@@ -2,119 +2,164 @@ package assembler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.util.Scanner;
 
 /**
  * The Parser class reads and parses the input assembly file.
- * It manages the two passes over the input: one for building the symbol table,
- * and another for generating the machine code.
+ * It provides methods to navigate through commands and extract their components.
  */
 public class Parser {
     private Scanner scanner;
-    private String currentLine;
+    private String currentCommand;
+    private boolean hasNext;
 
     /**
      * Constructor to initialize the parser with the input file.
      */
     public Parser(File inputFile) throws FileNotFoundException {
         this.scanner = new Scanner(inputFile);
+        this.hasNext = false;
+        advance(); // Load the first command
     }
 
     /**
-     * First pass: Reads through the file and builds the symbol table.
+     * Returns true if there are more commands in the input.
      */
-    public void firstPass(SymbolTable symbolTable) {
-        int lineNumber = 0;
+    public boolean hasMoreCommands() {
+        return hasNext;
+    }
+
+    /**
+     * Reads the next command from the input and makes it the current command.
+     * Should be called only if hasMoreCommands() is true.
+     * Initially there is no current command.
+     */
+    public void advance() {
+        currentCommand = null;
+        hasNext = false;
+
         while (scanner.hasNextLine()) {
-            currentLine = scanner.nextLine().trim();
+            String line = scanner.nextLine().trim();
 
-            // Ignore empty lines and comments
-            if (currentLine.isEmpty() || currentLine.startsWith("//")) {
+            // Skip empty lines and comments
+            if (line.isEmpty() || line.startsWith("//")) {
                 continue;
             }
 
-            // Handle label declarations (e.g. (LOOP))
-            if (currentLine.startsWith("(")) {
-                String label = currentLine.substring(1, currentLine.indexOf(')'));
-                symbolTable.addEntry(label, lineNumber);
-                continue;
+            // Remove inline comments
+            int commentIndex = line.indexOf("//");
+            if (commentIndex != -1) {
+                line = line.substring(0, commentIndex).trim();
             }
 
-            System.out.println(lineNumber + ": " + currentLine);
-            lineNumber++;
+            if (!line.isEmpty()) {
+                currentCommand = line;
+                hasNext = true;
+                return;
+            }
         }
     }
 
     /**
-     * Second pass: Reads the file again and generates machine code.
-     * The symbol table is used to replace labels with memory addresses.
+     * Returns the type of the current command:
+     * A_COMMAND for @Xxx where Xxx is either a symbol or a decimal number
+     * C_COMMAND for dest=comp;jump
+     * L_COMMAND for (Xxx) where Xxx is a symbol
      */
-    public void secondPass(SymbolTable symbolTable, Code code, PrintWriter outputFile, File inputFile) throws FileNotFoundException {
-        scanner = new Scanner(inputFile);
-        int variableAddress = 16; // Start at memory address 16 for variables
-
-        while (scanner.hasNextLine()) {
-            currentLine = scanner.nextLine().trim();
-
-            // Ignore empty lines and comments
-            if (currentLine.isEmpty() || currentLine.startsWith("//")) {
-                continue;
-            }
-
-            // Skip label lines (e.g. (ITSR0)) from being processed as A-instructions
-            if (currentLine.startsWith("(")) {
-                continue;  // Skip labels completely, they are processed in the first pass
-            }
-
-            // Process A-instructions (e.g. @value)
-            if (currentLine.startsWith("@")) {
-                String symbol = currentLine.substring(1);
-
-                if (symbolTable.contains(symbol)) {
-                    // If the symbol exists in the table, write the address
-                    int address = symbolTable.getAddress(symbol);
-                    outputFile.println(code.toBinaryA(address));  // Write the binary A instruction to file
-                } else {
-                    // Check if the symbol is a number
-                    if (symbol.matches("\\d+")) {  // Matches only digits
-                        int value = Integer.parseInt(symbol);  // Convert to integer directly
-                        outputFile.println(code.toBinaryA(value));  // Write the binary A instruction to file
-                    } else {
-                        // If it's a variable that has not been seen before, assign a new address
-                        // Only add to symbol table if it is not already there
-                        if (!symbolTable.contains(symbol)) {
-                            symbolTable.addEntry(symbol, variableAddress++);  // Assign new address for the variable
-                        }
-                        // Write the binary A instruction using the assigned address
-                        outputFile.println(code.toBinaryA(symbolTable.getAddress(symbol)));
-                    }
-                }
-            } else { // Process C-instructions (e.g. D=A)
-                String dest = null;
-                String comp = null;
-                String jump = null;
-
-                // Check if '=' exists (if not, there is no destination)
-                if (currentLine.contains("=")) {
-                    String[] parts = currentLine.split("=");
-                    dest = parts[0];
-                    String compJumpPart = parts[1];  // Get the comp and jump part after '='
-                    comp = compJumpPart.split(";")[0];  // Get the comp part
-                    jump = compJumpPart.contains(";") ? compJumpPart.split(";")[1] : null;  // If jump exists, get it
-                } else {
-                    // If '=' is missing, only comp and jump are present
-                    comp = currentLine.split(";")[0];  // Just comp part
-                    jump = currentLine.contains(";") ? currentLine.split(";")[1] : null;  // If jump exists, get it
-                }
-
-                outputFile.println(code.toBinaryC(dest, comp, jump));  // Write the binary C instruction to file
-            }
+    public CommandType commandType() {
+        if (currentCommand == null) {
+            throw new IllegalStateException("No current command");
         }
 
-        // Print the final symbol table
-//        symbolTable.printSymbolTable();
-
-        scanner.close();
+        if (currentCommand.startsWith("@")) {
+            return CommandType.A_COMMAND;
+        } else if (currentCommand.startsWith("(") && currentCommand.endsWith(")")) {
+            return CommandType.L_COMMAND;
+        } else {
+            return CommandType.C_COMMAND;
+        }
     }
+
+    /**
+     * Returns the symbol or decimal Xxx of the current command @Xxx or (Xxx).
+     * Should be called only when commandType() is A_COMMAND or L_COMMAND.
+     */
+    public String symbol() {
+        CommandType type = commandType();
+        if (type == CommandType.A_COMMAND) {
+            return currentCommand.substring(1); // Remove '@'
+        } else if (type == CommandType.L_COMMAND) {
+            return currentCommand.substring(1, currentCommand.length() - 1); // Remove '(' and ')'
+        } else {
+            throw new IllegalStateException("symbol() should only be called for A_COMMAND or L_COMMAND");
+        }
+    }
+
+    /**
+     * Returns the dest mnemonic in the current C-command (8 possibilities).
+     * Should be called only when commandType() is C_COMMAND.
+     */
+    public String dest() {
+        if (commandType() != CommandType.C_COMMAND) {
+            throw new IllegalStateException("dest() should only be called for C_COMMAND");
+        }
+
+        if (currentCommand.contains("=")) {
+            return currentCommand.split("=")[0];
+        } else {
+            return null; // No destination
+        }
+    }
+
+    /**
+     * Returns the comp mnemonic in the current C-command (28 possibilities).
+     * Should be called only when commandType() is C_COMMAND.
+     */
+    public String comp() {
+        if (commandType() != CommandType.C_COMMAND) {
+            throw new IllegalStateException("comp() should only be called for C_COMMAND");
+        }
+
+        String compPart = currentCommand;
+
+        // Remove dest part if exists
+        if (compPart.contains("=")) {
+            compPart = compPart.split("=")[1];
+        }
+
+        // Remove jump part if exists
+        if (compPart.contains(";")) {
+            compPart = compPart.split(";")[0];
+        }
+
+        return compPart;
+    }
+
+    /**
+     * Returns the jump mnemonic in the current C-command (8 possibilities).
+     * Should be called only when commandType() is C_COMMAND.
+     */
+    public String jump() {
+        if (commandType() != CommandType.C_COMMAND) {
+            throw new IllegalStateException("jump() should only be called for C_COMMAND");
+        }
+
+        if (currentCommand.contains(";")) {
+            String[] parts = currentCommand.split(";");
+            return parts[parts.length - 1]; // Get the last part after ';'
+        } else {
+            return null; // No jump
+        }
+    }
+
+    /**
+     * Closes the scanner.
+     */
+    public void close() {
+        if (scanner != null) {
+            scanner.close();
+        }
+    }
+
+
 }
